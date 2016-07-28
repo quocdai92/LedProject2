@@ -55,3 +55,6 @@ D:\Dai\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.FormEdit.resour
 D:\Dai\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Main.resources
 D:\Dai\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Properties.Resources.resources
 D:\Dai\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csproj.GenerateResource.Cache
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe.config
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.exe
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.pdb

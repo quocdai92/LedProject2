@@ -105,25 +105,7 @@ namespace ManageImage
             }
             if (isPlay)
             {
-                //if (Frames?.ListImages.Count > 0)
-                //{
-                //    for (int i = 0; i < Frames.ListImages.Count; i++)
-                //    {
-                //        if (Frames.DisplayAreas[i].ListGrid != null)
-                //        {
-                //            GraphicsPath path = new GraphicsPath();
-                //            foreach (var cell in Frames.DisplayAreas[i].ListGrid)
-                //            {
-                //                path.AddEllipse(cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
-                //            }
-                //            Region region = new Region(path);
-                //            myBuffer.Graphics.SetClip(region, CombineMode.Replace);
-                //            myBuffer.Graphics.DrawImage(Frames.ListImages[i], Frames.DisplayAreas[i].X,
-                //            Frames.DisplayAreas[i].Y,
-                //            Frames.DisplayAreas[i].Width * CellSize, Frames.DisplayAreas[i].Height * CellSize);
-                //        }
-                //    }
-                //}
+                
                 if (Frames.ListGrid.Count > 0)
                 {
                     foreach (var cell in Frames.ListGrid)

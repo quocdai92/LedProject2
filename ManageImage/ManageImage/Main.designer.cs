@@ -72,7 +72,6 @@
             this.dgvListArea.Size = new System.Drawing.Size(294, 286);
             this.dgvListArea.TabIndex = 1;
             this.dgvListArea.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvListArea_CellDoubleClick);
-            this.dgvListArea.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvListArea_CellValueChanged);
             this.dgvListArea.SelectionChanged += new System.EventHandler(this.dgvListArea_SelectionChanged);
             // 
             // menuStrip1

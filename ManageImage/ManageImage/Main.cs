@@ -307,12 +307,7 @@ namespace ManageImage
             }
             return 0;
         }
-
-        private void dgvListArea_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
+        
         private void SaveCurrentArea(DisplayArea displayArea)
         {
             if (displayArea != null)

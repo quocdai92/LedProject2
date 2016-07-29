@@ -58,3 +58,10 @@ D:\Dai\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csproj.Generate
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe.config
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.exe
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.pdb
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csprojResolveAssemblyReference.cache
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.FormEdit.resources
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Main.resources
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Properties.Resources.resources
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csproj.GenerateResource.Cache
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe
+C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.pdb

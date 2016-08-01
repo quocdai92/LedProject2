@@ -65,3 +65,13 @@ C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csproj.GenerateResource.Cache
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe
 C:\Users\IT\Desktop\WorkLedProject\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.pdb
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe.config
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.exe
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.pdb
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.exe
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\bin\Debug\ManageImage.pdb
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csprojResolveAssemblyReference.cache
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.FormEdit.resources
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Main.resources
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.Properties.Resources.resources
+C:\tiendatbk92\LedProject2\ManageImage\ManageImage\obj\Debug\ManageImage.csproj.GenerateResource.Cache

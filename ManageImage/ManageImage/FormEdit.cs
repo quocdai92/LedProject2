@@ -51,8 +51,8 @@ namespace ManageImage
         private int cellSize = Main.CellSize;
         public FormEdit(DisplayArea area)
         {
-            widthShow = area.Width*cellSize;
-            heightShow = area.Height*cellSize;
+            widthShow = area.Width * cellSize;
+            heightShow = area.Height * cellSize;
             Table.Rows.Clear();
             if (area.ListFileTemplates != null && area.ListFileTemplates.Count > 0)
             {
@@ -127,7 +127,7 @@ namespace ManageImage
                                         worldCords.Y + (worldCords.Height / 2.0f));
 
         }
-        
+
         private void PaintImage(int widthShow, int heightShow, int width, int height)
         {
             Rectangle drawRect = new Rectangle(
@@ -147,30 +147,25 @@ namespace ManageImage
             if (bitmap != null)
             {
                 myBuffer.Graphics.DrawImage(bitmap, drawRect);
-
             }
             myBuffer.Graphics.DrawRectangle(pen, showRect);
             Brush brush;
-            if (isStart)
-            {
-                brush = new SolidBrush(SystemColors.ControlDark);
-            }
-            else
-            {
-                brush = new SolidBrush(Color.FromArgb(200, 128, 128, 128));
-            }
+
+
+            brush = new SolidBrush(Color.FromArgb(200, 128, 128, 128));
+
             pen.Color = Color.DimGray;
             var linesX = showRect.Height / (cellSize) + 1;
             var linesY = showRect.Width / (cellSize) + 1;
             //draw x
             for (int k = 0; k < linesX; k++)
             {
-                myBuffer.Graphics.DrawLine(pen, showRect.X, showRect.Y + k*cellSize, showRect.X + showRect.Width, showRect.Y + k * cellSize);
+                myBuffer.Graphics.DrawLine(pen, showRect.X, showRect.Y + k * cellSize, showRect.X + showRect.Width, showRect.Y + k * cellSize);
             }
             //draw y
             for (int k = 0; k < linesY; k++)
             {
-                myBuffer.Graphics.DrawLine(pen, showRect.X + k * cellSize, showRect.Y , showRect.X + k * cellSize,showRect.Y + showRect.Height);
+                myBuffer.Graphics.DrawLine(pen, showRect.X + k * cellSize, showRect.Y, showRect.X + k * cellSize, showRect.Y + showRect.Height);
             }
             myBuffer.Graphics.FillRectangle(brush, 0, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
             myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 + widthShow / 2, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
@@ -226,6 +221,7 @@ namespace ManageImage
                     if (bitmap == null)
                     {
                         var listImg = readFileTmp(fileName);
+                        ListImage.AddRange(listImg);
                         if (listImg.Count > 0)
                         {
                             firstImage = listImg.ElementAt(0);
@@ -348,26 +344,25 @@ namespace ManageImage
         private List<Image> createListImage()
         {
             List<Image> listImage = new List<Image>();
-            foreach (DataGridViewRow row in dataGridView1.Rows)
+            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Cells[0].Value.ToString() != "")
             {
-                if (row.Cells[0].Value != null && !string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
+                string filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+                int timeplay = 0;
+                Int32.TryParse(dataGridView1.CurrentRow.Cells[1].Value.ToString(), out timeplay);
+                var listImg = readFileTmp(filename);
+                var coutImg = listImg.Count;
+                if (coutImg > 0)
                 {
-                    string filename = row.Cells[0].Value.ToString();
-                    int timeplay = 0;
-                    Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
-                    var listImg = readFileTmp(filename);
-                    var coutImg = listImg.Count;
-                    if (coutImg > 0)
+                    var countLoop = timeplay * 1000 / interval;
+                    for (int i = 0; i < countLoop; i++)
                     {
-                        var countLoop = timeplay * 1000 / interval;
-                        for (int i = 0; i < countLoop; i++)
-                        {
-                            var j = i % (coutImg);
-                            listImage.Add(listImg.ElementAt(j));
-                        }
+                        var j = i % (coutImg);
+                        listImage.Add(listImg.ElementAt(j));
                     }
                 }
+
             }
+            //var cropImg = createListImageCrop(listImage);
             return listImage;
         }
 
@@ -375,23 +370,19 @@ namespace ManageImage
         {
             if (index < ListImage.Count)
             {
-                index++;
-                if (index == ListImage.Count)
-                {
-                    index = 0;
-                    //ListImage.Clear();
-                    //bitmap = (Bitmap)firstImage;
-                    //isStart = false;
-                    //setup(true);
-                    //T.Stop();
-                }
                 //re-draw
                 bitmap = (Bitmap)ListImage[index];
                 setup(false);
+                index++;
+            }
+            else
+            {
+                T.Stop();
+                isStart = false;
             }
         }
 
-      
+
 
         private Image ByteArrayToImage(byte[] byteArrayIn)
         {
@@ -405,11 +396,11 @@ namespace ManageImage
         {
             this.tbX.Text = Convert.ToInt32(x).ToString();
             this.tbY.Text = Convert.ToInt32(y).ToString();
-            this.tbWidth.Text = Convert.ToInt32(width/cellSize).ToString();
-            this.tbHeight.Text = Convert.ToInt32(height/cellSize).ToString();
+            this.tbWidth.Text = Convert.ToInt32(width / cellSize).ToString();
+            this.tbHeight.Text = Convert.ToInt32(height / cellSize).ToString();
 
         }
-       
+
         private void tbX_TextChanged(object sender, EventArgs e)
         {
             int temp;
@@ -435,7 +426,7 @@ namespace ManageImage
             int temp;
             if (int.TryParse(tbWidth.Text, out temp))
             {
-                width = temp*cellSize;
+                width = temp * cellSize;
                 panel1.Invalidate();
             }
         }
@@ -445,7 +436,7 @@ namespace ManageImage
             int temp;
             if (int.TryParse(tbHeight.Text, out temp))
             {
-                height = temp*cellSize;
+                height = temp * cellSize;
                 panel1.Invalidate();
             }
         }
@@ -455,7 +446,7 @@ namespace ManageImage
             openFile();
         }
 
-       
+
         private void btSave_Click(object sender, EventArgs e)
         {
             progressBarSave.Visible = true;
@@ -493,23 +484,25 @@ namespace ManageImage
             this.Close();
         }
 
-      
-       
+
+
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            isStart = true;
             var listImage = createListImage();
             ListImage = new List<Image>();
             ListImage.AddRange(listImage);
-            if(ListImage.Count > 0)
+            if (ListImage.Count > 0)
             {
                 isStart = true;
                 T.Start();
             }
-           
+
         }
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            isStart = false;
             T.Stop();
             //index = 0;
             //ListImage.Clear();
@@ -518,6 +511,24 @@ namespace ManageImage
             setup(true);
         }
 
-       
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Cells[0].Value.ToString() != "")
+            {
+                var filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+                ListImage = new List<Image>();
+                index = 0;
+                T.Stop();
+                var listImg = readFileTmp(filename);
+
+                if (listImg.Count > 0)
+                {
+                    firstImage = listImg.ElementAt(0);
+                    bitmap = (Bitmap)firstImage;
+                    setup(false);
+                }
+            }
+        }
+
     }
 }

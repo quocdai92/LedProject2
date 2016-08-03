@@ -19,9 +19,12 @@ namespace ManageImage
         public Main()
         {
             InitializeComponent();
-            ResetGridPanel(CellSize);
+
             currentContext = BufferedGraphicsManager.Current;
             isDrawDisplayArea = false;
+            panel1.Height = CellSize * h;
+            panel1.Width = CellSize * w;
+            ResetGridPanel(CellSize);
             panel1.Invalidate();
             dgvListArea.Columns.Add("Name", "Name");
             dgvListArea.Columns.Add("Width", "Width");
@@ -36,7 +39,8 @@ namespace ManageImage
                                                this.panel1.DisplayRectangle);
             T.Tick += Slider;
         }
-
+        private short w = 50;
+        private short h = 100;
         public static int CellSize = 20;
         private List<Cell> gridMaps = new List<Cell>();
         private bool isDrawDisplayArea;
@@ -178,6 +182,14 @@ namespace ManageImage
 
                 }
                 isChangeGrid = true;
+                Point changePoint = new Point(e.Location.X - startPosition.X,
+                                  e.Location.Y - startPosition.Y);
+                //if (panel2.AutoScrollPosition.X + changePoint.X > panel2.Width
+                //    || panel2.AutoScrollPosition.Y + changePoint.Y > panel2.Height)
+
+                    panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X,
+                                                          panel2.AutoScrollPosition.Y + changePoint.Y);
+
                 panel1.Invalidate();
             }
         }
@@ -443,14 +455,16 @@ namespace ManageImage
         private void ResetGridPanel(int cellSize)
         {
             gridMaps = new List<Cell>();
-            for (int y = 0; y <= panel1.Height / cellSize; ++y)
+            for (int y = 0; y <= h; ++y)
             {
-                for (int k = 0; k <= panel1.Width / cellSize; k++)
+                for (int k = 0; k <= w; k++)
                 {
                     var cell = new Cell()
                     {
                         Size = cellSize,
-                        StartPosition = new Point(k * cellSize, y * cellSize)
+                        StartPosition = new Point(k * cellSize, y * cellSize),
+                        X = k,
+                        Y = y
                     };
                     gridMaps.Add(cell);
                 }
@@ -741,6 +755,8 @@ namespace ManageImage
                 CurrentArea = null;
                 isDrawDisplayArea = false;
             }
+            panel1.Width = CellSize*w;
+            panel1.Height = CellSize*h;
             panel1.Invalidate();
         }
 

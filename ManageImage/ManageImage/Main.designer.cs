@@ -32,6 +32,7 @@
             this.dgvListArea = new System.Windows.Forms.DataGridView();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableEditionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnNewArea = new System.Windows.Forms.Button();
@@ -40,24 +41,22 @@
             this.trkbGridSize = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
             this.btnDelete = new System.Windows.Forms.Button();
-            this.enableEditionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnEdit = new System.Windows.Forms.Button();
+            this.panel2 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvListArea)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trkbGridSize)).BeginInit();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoSize = true;
             this.panel1.BackColor = System.Drawing.Color.White;
-            this.panel1.Location = new System.Drawing.Point(312, 32);
+            this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(664, 526);
+            this.panel1.Size = new System.Drawing.Size(423, 526);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
@@ -94,6 +93,15 @@
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // enableEditionToolStripMenuItem
+            // 
+            this.enableEditionToolStripMenuItem.Enabled = false;
+            this.enableEditionToolStripMenuItem.Name = "enableEditionToolStripMenuItem";
+            this.enableEditionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.enableEditionToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.enableEditionToolStripMenuItem.Text = "Enable Edition";
+            this.enableEditionToolStripMenuItem.Click += new System.EventHandler(this.enableEditionToolStripMenuItem_Click);
             // 
             // startToolStripMenuItem
             // 
@@ -175,15 +183,6 @@
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
-            // enableEditionToolStripMenuItem
-            // 
-            this.enableEditionToolStripMenuItem.Enabled = false;
-            this.enableEditionToolStripMenuItem.Name = "enableEditionToolStripMenuItem";
-            this.enableEditionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.enableEditionToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.enableEditionToolStripMenuItem.Text = "Enable Edition";
-            this.enableEditionToolStripMenuItem.Click += new System.EventHandler(this.enableEditionToolStripMenuItem_Click);
-            // 
             // btnEdit
             // 
             this.btnEdit.Location = new System.Drawing.Point(57, 46);
@@ -195,18 +194,30 @@
             this.btnEdit.Visible = false;
             this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
+            // panel2
+            // 
+            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel2.AutoScroll = true;
+            this.panel2.Controls.Add(this.panel1);
+            this.panel2.Location = new System.Drawing.Point(312, 32);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(664, 526);
+            this.panel2.TabIndex = 9;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(988, 570);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnNewArea);
             this.Controls.Add(this.dgvListArea);
-            this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Main";
@@ -219,6 +230,8 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trkbGridSize)).EndInit();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -240,5 +253,6 @@
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.ToolStripMenuItem enableEditionToolStripMenuItem;
         private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Panel panel2;
     }
 }

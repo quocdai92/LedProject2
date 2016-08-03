@@ -49,10 +49,16 @@ namespace ManageImage
         private Image firstImage;
         private bool isStart;
         private int cellSize = Main.CellSize;
+        private string color;
+        private int cellX;
+        private int cellY;
         public FormEdit(DisplayArea area)
         {
             widthShow = area.Width * cellSize;
             heightShow = area.Height * cellSize;
+            cellX = area.Width;
+            cellY = area.Height;
+            color = area.Color;
             Table.Rows.Clear();
             if (area.ListFileTemplates != null && area.ListFileTemplates.Count > 0)
             {
@@ -64,9 +70,9 @@ namespace ManageImage
                         if (listImg.Count > 0)
                         {
                             firstImage = listImg.ElementAt(0);
-                            bitmap = (Bitmap)firstImage;
+                            bitmap = (Bitmap)(firstImage);
                             height = heightShow;
-                            width = widthShow;
+                            width = widthShow;                           
                             //setup(true);
                             //setFileInfo();
                             //panel1.Invalidate();
@@ -142,31 +148,36 @@ namespace ManageImage
 
             myBuffer.Graphics.Clear(Color.White); //Clear the Back buffer
                                                   //Draw the image, Write image to back buffer, and render back buffer              
-            Pen pen = new Pen(Color.Black);
-            pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            //Pen pen = new Pen(Color.Black);
+            //pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            ////if (bitmap != null)
+            ////{
+            ////    myBuffer.Graphics.DrawImage(bitmap, drawRect);
+            ////}
+            //myBuffer.Graphics.DrawRectangle(pen, showRect);
+            Brush brush;
+            brush = new SolidBrush(Color.FromArgb(200, 128, 128, 128));
+            Brush brushCell;
+
             if (bitmap != null)
             {
-                myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                if (isStart)
+                {
+                    myBuffer.Graphics.FillRectangle(new SolidBrush(Color.Black), showRect);
+                    for (int j = 0; j < cellY; j++)
+                        for (int i = 0; i < cellX; i++)
+                        {
+                            brushCell = new SolidBrush(bitmap.GetPixel(i, j));
+                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize, showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
+                        }
+                }
+                else
+                {
+                    myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                }
             }
-            myBuffer.Graphics.DrawRectangle(pen, showRect);
-            Brush brush;
 
-
-            brush = new SolidBrush(Color.FromArgb(200, 128, 128, 128));
-
-            pen.Color = Color.DimGray;
-            var linesX = showRect.Height / (cellSize) + 1;
-            var linesY = showRect.Width / (cellSize) + 1;
-            //draw x
-            for (int k = 0; k < linesX; k++)
-            {
-                myBuffer.Graphics.DrawLine(pen, showRect.X, showRect.Y + k * cellSize, showRect.X + showRect.Width, showRect.Y + k * cellSize);
-            }
-            //draw y
-            for (int k = 0; k < linesY; k++)
-            {
-                myBuffer.Graphics.DrawLine(pen, showRect.X + k * cellSize, showRect.Y, showRect.X + k * cellSize, showRect.Y + showRect.Height);
-            }
+                        
             myBuffer.Graphics.FillRectangle(brush, 0, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
             myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 + widthShow / 2, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
             myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 - widthShow / 2, 0, widthShow, panel1.Height / 2 - heightShow / 2);
@@ -225,7 +236,7 @@ namespace ManageImage
                         if (listImg.Count > 0)
                         {
                             firstImage = listImg.ElementAt(0);
-                            bitmap = (Bitmap)firstImage;
+                            bitmap = (Bitmap)(firstImage);
                             x = panel1.Width / 2;
                             y = panel1.Height / 2;
                             height = heightShow;
@@ -349,7 +360,23 @@ namespace ManageImage
                 string filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
                 int timeplay = 0;
                 Int32.TryParse(dataGridView1.CurrentRow.Cells[1].Value.ToString(), out timeplay);
-                var listImg = readFileTmp(filename);
+                List<Image> listImg = new List<Image>();
+                var listImageFile = readFileTmp(filename);
+                foreach (Image img in listImageFile)
+                {
+                    Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+                    Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
+                    if (drawRect.IntersectsWith(drawRect))
+                    {
+                        var intersectRect = Rectangle.Intersect(showRect, drawRect);
+                        var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y, intersectRect.Width, intersectRect.Height);
+
+                        var cropImg = cropImage(resizeImage(img, width, height), cropRect);
+                        var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
+                        listImg.Add(cellImg);
+                    }
+                }
+                listImageFile.Clear();
                 var coutImg = listImg.Count;
                 if (coutImg > 0)
                 {
@@ -357,7 +384,7 @@ namespace ManageImage
                     for (int i = 0; i < countLoop; i++)
                     {
                         var j = i % (coutImg);
-                        listImage.Add(listImg.ElementAt(j));
+                        listImage.Add(resizeImage(listImg.ElementAt(j),cellX, cellY));
                     }
                 }
 
@@ -365,7 +392,7 @@ namespace ManageImage
             //var cropImg = createListImageCrop(listImage);
             return listImage;
         }
-
+      
         private void slider(Object source, EventArgs e)
         {
             if (index < ListImage.Count)
@@ -377,8 +404,13 @@ namespace ManageImage
             }
             else
             {
-                T.Stop();
                 isStart = false;
+                T.Stop();
+                index = 0;
+                ListImage.Clear();
+                bitmap = (Bitmap)firstImage;
+                isStart = false;
+                setup(true);
             }
         }
 
@@ -504,9 +536,9 @@ namespace ManageImage
         {
             isStart = false;
             T.Stop();
-            //index = 0;
-            //ListImage.Clear();
-            //bitmap = (Bitmap)firstImage;
+            index = 0;
+            ListImage.Clear();
+            bitmap = (Bitmap)firstImage;
             isStart = false;
             setup(true);
         }
@@ -523,11 +555,28 @@ namespace ManageImage
 
                 if (listImg.Count > 0)
                 {
-                    firstImage = listImg.ElementAt(0);
-                    bitmap = (Bitmap)firstImage;
+                    firstImage = listImg[0];
+                    bitmap = (Bitmap)(firstImage);
                     setup(false);
                 }
             }
+        }
+
+        private SolidBrush GetAreaColor(string color)
+        {
+            if (color != null)
+            {
+                switch (color)
+                {
+                    case "red": return new SolidBrush(Color.Red);
+                    case "orange": return new SolidBrush(Color.Orange);
+                    case "yellow": return new SolidBrush(Color.Yellow);
+                    case "green": return new SolidBrush(Color.Green);
+                    case "blue": return new SolidBrush(Color.Blue);
+                    case "violet": return new SolidBrush(Color.Violet);
+                }
+            }
+            return new SolidBrush(Color.FromArgb(128, Color.Black));
         }
 
     }

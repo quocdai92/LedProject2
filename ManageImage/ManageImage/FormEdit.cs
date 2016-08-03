@@ -402,7 +402,49 @@ namespace ManageImage
             //var cropImg = createListImageCrop(listImage);
             return listImage;
         }
-      
+
+        private List<Image> createListAllImage()
+        {
+            List<Image> listImage = new List<Image>();
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                if (row.Cells[0].Value != null && !string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
+                {
+                    string filename = row.Cells[0].Value.ToString();
+                    int timeplay = 0;
+                    Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
+                    List<Image> listImg = new List<Image>();
+                    var listImageFile = readFileTmp(filename);
+                    foreach (Image img in listImageFile)
+                    {
+                        Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+                        Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
+                        if (drawRect.IntersectsWith(drawRect))
+                        {
+                            var intersectRect = Rectangle.Intersect(showRect, drawRect);
+                            var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y, intersectRect.Width, intersectRect.Height);
+
+                            var cropImg = cropImage(resizeImage(img, width, height), cropRect);
+                            var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
+                            listImg.Add(cellImg);
+                        }
+                    }
+                    listImageFile.Clear();
+                    var coutImg = listImg.Count;
+                    if (coutImg > 0)
+                    {
+                        var countLoop = timeplay * 1000 / interval;
+                        for (int i = 0; i < countLoop; i++)
+                        {
+                            var j = i % (coutImg);
+                            listImage.Add(resizeImage(listImg.ElementAt(j), cellX, cellY));
+                        }
+                    }
+                }
+            }
+            return listImage;
+        }
+
         private void slider(Object source, EventArgs e)
         {
             if (index < ListImage.Count)
@@ -589,5 +631,17 @@ namespace ManageImage
             return new SolidBrush(Color.FromArgb(128, Color.Black));
         }
 
+        private void playAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            isStart = true;
+            var listImage = createListAllImage();
+            ListImage = new List<Image>();
+            ListImage.AddRange(listImage);
+            if (ListImage.Count > 0)
+            {
+                isStart = true;
+                T.Start();
+            }
+        }
     }
 }

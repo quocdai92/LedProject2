@@ -56,6 +56,7 @@ namespace ManageImage
         {
             widthShow = area.Width * cellSize;
             heightShow = area.Height * cellSize;
+            
             cellX = area.Width;
             cellY = area.Height;
             color = area.Color;
@@ -90,6 +91,8 @@ namespace ManageImage
             currentContext = BufferedGraphicsManager.Current;
             x = panel1.Width / 2;
             y = panel1.Height / 2;
+            this.panel1.Width = widthShow;
+            this.panel1.Height = heightShow;
             dataGridView1.DataSource = Table;
             dataGridView1.Columns[0].Width = (int)dataGridView1.Width * 2 / 3;
             dataGridView1.Columns[1].Width = (int)dataGridView1.Width / 3;
@@ -173,7 +176,14 @@ namespace ManageImage
                 }
                 else
                 {
-                    myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                    //myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                    myBuffer.Graphics.FillRectangle(new SolidBrush(Color.Black), showRect);
+                    for (int j = 0; j < cellY; j++)
+                        for (int i = 0; i < cellX; i++)
+                        {
+                            brushCell = new SolidBrush(Color.Gray);
+                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize, showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
+                        }
                 }
             }
 

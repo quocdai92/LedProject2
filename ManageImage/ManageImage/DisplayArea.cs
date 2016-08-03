@@ -35,7 +35,9 @@ namespace ManageImage
         public int Size { get; set; }
         public Point StartPosition { get; set; }
         public Color Color { get; set; }
+        //pixel location x
         public int X { get; set; }
+        //pixel locaiton y
         public int Y { get; set; }
 
     }

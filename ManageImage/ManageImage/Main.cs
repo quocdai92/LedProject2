@@ -39,7 +39,7 @@ namespace ManageImage
                                                this.panel1.DisplayRectangle);
             T.Tick += Slider;
         }
-        private short w = 50;
+        private short w = 100;
         private short h = 100;
         public static int CellSize = 20;
         private List<Cell> gridMaps = new List<Cell>();
@@ -78,14 +78,14 @@ namespace ManageImage
             Pen p = new Pen(Color.Black);
             SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red));
             myBuffer.Graphics.Clear(Color.Black);
-            if (gridMaps != null)
-            {
-                foreach (var cell in gridMaps)
-                {
-                    myBuffer.Graphics.FillEllipse(new SolidBrush(Color.SlateGray),
-                        cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
-                }
-            }
+            //if (gridMaps != null)
+            //{
+            //    foreach (var cell in gridMaps)
+            //    {
+            //        myBuffer.Graphics.FillEllipse(new SolidBrush(Color.SlateGray),
+            //            cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
+            //    }
+            //}
             if (isDrawDisplayArea && isEditable)
             {
                 //myBuffer.Graphics.DrawRectangle(recPen, displayRectangle);
@@ -184,11 +184,17 @@ namespace ManageImage
                 isChangeGrid = true;
                 Point changePoint = new Point(e.Location.X - startPosition.X,
                                   e.Location.Y - startPosition.Y);
-                //if (panel2.AutoScrollPosition.X + changePoint.X > panel2.Width
-                //    || panel2.AutoScrollPosition.Y + changePoint.Y > panel2.Height)
-
+                if (e.Location.X < panel1.Width/3 || e.Location.X > 2*panel2.Width/3 ||
+                    e.Location.Y < panel1.Height / 3 || e.Location.Y > 2 * panel2.Height / 3)
+                {
                     panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X,
                                                           panel2.AutoScrollPosition.Y + changePoint.Y);
+                }
+                //Point changePoint = new Point(e.Location.X - startPosition.X,
+                //                  e.Location.Y - startPosition.Y);
+                //if (e.Location.X < panel2.Location.X || e.Location.X > panel2.Location.X + panel2.Width)
+                //    panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X,
+                //                                          panel2.AutoScrollPosition.Y + changePoint.Y);
 
                 panel1.Invalidate();
             }
@@ -737,12 +743,12 @@ namespace ManageImage
             //isDrawDisplayArea = false;
             foreach (var area in ListAreas)
             {
-                area.ListGrid = new List<Cell>();
+                area.ListGrid = UpdateListGrid(area.ListGrid);
             }
-            if (myBuffer != null)
-                myBuffer.Dispose();
-            myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
-                                               this.panel1.DisplayRectangle);
+            //if (myBuffer != null)
+            //    myBuffer.Dispose();
+            //myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
+            //                                   this.panel1.DisplayRectangle);
             //panel1.Dispose();
             if (dgvListArea.CurrentRow != null && dgvListArea.CurrentRow.Cells[0].Value != null)
             {
@@ -760,6 +766,16 @@ namespace ManageImage
             panel1.Invalidate();
         }
 
+        private List<Cell> UpdateListGrid(List<Cell> listGrid)
+        {
+            foreach (var cell in listGrid)
+            {
+                cell.Size = CellSize;
+                cell.StartPosition = new Point(cell.X*CellSize,cell.Y*CellSize);
+            }
+            return listGrid;
+        } 
+
         private void Main_Resize(object sender, EventArgs e)
         {
             if (myBuffer != null)
@@ -769,8 +785,14 @@ namespace ManageImage
 
             panel1.Focus();
             panel1.Invalidate();
-            ResetGridPanel(CellSize);
+            //panel2.Anchor = AnchorStyles.Bottom|AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
+            //ResetGridPanel(CellSize);
             //setup(false);
+        }
+
+        private void panel2_Scroll(object sender, ScrollEventArgs e)
+        {
+            panel1.Invalidate();
         }
     }
 }

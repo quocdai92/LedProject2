@@ -200,11 +200,13 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel2.AutoScroll = true;
+            this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel2.Controls.Add(this.panel1);
             this.panel2.Location = new System.Drawing.Point(312, 32);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(664, 526);
             this.panel2.TabIndex = 9;
+            this.panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panel2_Scroll);
             // 
             // Main
             // 

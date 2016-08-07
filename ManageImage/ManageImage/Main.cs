@@ -72,8 +72,8 @@ namespace ManageImage
 
         private frmMAP map;
         public int minX, minY, maxX, maxY;
-        public List<Point> line1; 
-        public List<Point> line2; 
+        public List<Point> line1;
+        public List<Point> line2;
         //public static List<FileTemplate> ListFileTemplates = new List<FileTemplate>(); 
 
         #region Event Handle
@@ -577,14 +577,14 @@ namespace ManageImage
             int timeTotal = 0;
             foreach (var file in listFile)
             {
-                if (file.ListImages != null && file.ListImages.Count > 0)
+                if (file.ListImageReturn != null && file.ListImageReturn.Count > 0)
                 {
                     timeTotal += file.TimePlay;
                     var countImge = file.TimePlay * 1000 / Interval;
                     for (int i = 0; i < countImge; i++)
                     {
-                        var idx = i % file.ListImages.Count;
-                        listImg.Add(file.ListImages[idx]);
+                        var idx = i % file.ListImageReturn.Count;
+                        listImg.Add(file.ListImageReturn[idx]);
                     }
                 }
             }
@@ -805,8 +805,14 @@ namespace ManageImage
         {
             width = (short)(maxX - minX + 1);
             height = (short)(maxY - minY + 1);
-            //panel1.Height = CellSize * h;
-            //panel1.Width = CellSize * w;
+            if (width * height < gridMaps.Count)
+            {
+                foreach (var displayArea in ListAreas)
+                {
+                    displayArea.ListGrid.Clear();
+                }
+            }
+
             ResetGridPanel(CellSize);
             if (line1 != null)
             {
@@ -843,44 +849,27 @@ namespace ManageImage
                     var newList = new List<Cell>();
                     foreach (var point in line1)
                     {
-                        var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY ).ToList();
+                        var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
                         newList.AddRange(cells);
                     }
                     gridMaps.Clear();
                     gridMaps.AddRange(newList);
                 }
             }
+            //panel1.Height = CellSize * h;
+            //panel1.Width = CellSize * w;
+            panel1.Invalidate();
+        }
+
+        public void ClearMap()
+        {
+            gridMaps.Clear();
+            foreach (var displayArea in ListAreas)
+            {
+                displayArea.ListGrid.Clear();
+            }
             panel1.Invalidate();
         }
         #endregion
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (ListAreas.Count > 0)
-            {
-                if (CurrentArea == null)
-                {
-                    T.Start();
-                    isPlay = true;
-                    trkbGridSize.Enabled = false;
-                }
-                else
-                {
-                    MessageBox.Show(@"You must Save before.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            isPlay = false;
-            T.Stop();
-            //isEditable = true;
-            //enableEditionToolStripMenuItem.Enabled = false;
-            //isDrawDisplayArea = true;
-            index = 0;
-            //panel1.Focus();
-            //panel1.Invalidate();
-        }
     }
 }

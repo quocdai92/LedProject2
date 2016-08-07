@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LedFullControl;
 using LedProject;
 
 namespace ManageImage
@@ -22,9 +23,9 @@ namespace ManageImage
 
             currentContext = BufferedGraphicsManager.Current;
             isDrawDisplayArea = false;
-            panel1.Height = CellSize * h;
-            panel1.Width = CellSize * w;
-            ResetGridPanel(CellSize);
+            panel1.Height = CellSize * height;
+            panel1.Width = CellSize * width;
+            //ResetGridPanel(CellSize);
             panel1.Invalidate();
             dgvListArea.Columns.Add("Name", "Name");
             dgvListArea.Columns.Add("Width", "Width");
@@ -39,8 +40,8 @@ namespace ManageImage
                                                this.panel1.DisplayRectangle);
             T.Tick += Slider;
         }
-        private short w = 100;
-        private short h = 100;
+        public short width = 100;
+        public short height = 100;
         public static int CellSize = 20;
         private List<Cell> gridMaps = new List<Cell>();
         private bool isDrawDisplayArea;
@@ -68,6 +69,11 @@ namespace ManageImage
         {
             Interval = Interval
         };
+
+        private frmMAP map;
+        public int minX, minY, maxX, maxY;
+        public List<Point> line1; 
+        public List<Point> line2; 
         //public static List<FileTemplate> ListFileTemplates = new List<FileTemplate>(); 
 
         #region Event Handle
@@ -78,14 +84,14 @@ namespace ManageImage
             Pen p = new Pen(Color.Black);
             SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red));
             myBuffer.Graphics.Clear(Color.Black);
-            //if (gridMaps != null)
-            //{
-            //    foreach (var cell in gridMaps)
-            //    {
-            //        myBuffer.Graphics.FillEllipse(new SolidBrush(Color.SlateGray),
-            //            cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
-            //    }
-            //}
+            if (gridMaps != null)
+            {
+                foreach (var cell in gridMaps)
+                {
+                    myBuffer.Graphics.FillEllipse(new SolidBrush(Color.SlateGray),
+                        cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
+                }
+            }
             if (isDrawDisplayArea && isEditable)
             {
                 //myBuffer.Graphics.DrawRectangle(recPen, displayRectangle);
@@ -165,30 +171,47 @@ namespace ManageImage
                 }
                 if (CurrentArea != null)
                 {
-                    CurrentArea.DisplayRectangle = new Rectangle(x, y, width, height);
-                    var listCellInArea = gridMaps.Where(cell => CurrentArea != null && IsGridInTheDisplayArea(cell, CurrentArea.DisplayRectangle)).ToList();
-                    CurrentArea.ListGrid = listCellInArea;
+                    var area = new Rectangle(x, y, width, height);
+                    var listCellInArea = gridMaps.Where(cell => CurrentArea != null && IsGridInTheDisplayArea(cell, area)).ToList();
+                    if (ModifierKeys.HasFlag(Keys.Control))
+                    {
+                        foreach (var cell in listCellInArea)
+                        {
+                            if (!CurrentArea.ListGrid.Contains(cell))
+                            {
+                                CurrentArea.ListGrid.Add(cell);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        CurrentArea.ListGrid = listCellInArea;
+                    }
                     if (dgvListArea.CurrentRow != null && dgvListArea.CurrentRow.Cells[0].Value != null)
                     {
                         //set value of width:
-                        var w = getWidthOfArea(CurrentArea.ListGrid) + 1;
+                        var w = getWidthOfArea(CurrentArea.ListGrid);
                         dgvListArea.CurrentRow.Cells[1].Value = w;
-                        CurrentArea.Width = w;
+                        //CurrentArea.Width = w;
                         //set value of height:
-                        var h = getHeightOfArea(CurrentArea.ListGrid) + 1;
+                        var h = getHeightOfArea(CurrentArea.ListGrid);
                         dgvListArea.CurrentRow.Cells[2].Value = h;
-                        CurrentArea.Height = h;
+                        //CurrentArea.Height = h;
                     }
 
                 }
                 isChangeGrid = true;
-                Point changePoint = new Point(e.Location.X - startPosition.X,
-                                  e.Location.Y - startPosition.Y);
-                if (e.Location.X < panel1.Width/3 || e.Location.X > 2*panel2.Width/3 ||
-                    e.Location.Y < panel1.Height / 3 || e.Location.Y > 2 * panel2.Height / 3)
+                if (cbkAutoScroll.Checked)
                 {
-                    panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X,
-                                                          panel2.AutoScrollPosition.Y + changePoint.Y);
+                    Point changePoint = new Point(e.Location.X - startPosition.X,
+                                  e.Location.Y - startPosition.Y);
+                    if (e.Location.X < panel1.Width / 3 || e.Location.X > 2 * panel2.Width / 3 ||
+                        e.Location.Y < panel1.Height / 3 || e.Location.Y > 2 * panel2.Height / 3)
+                    {
+                        panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X / 2,
+                                                              panel2.AutoScrollPosition.Y + changePoint.Y / 2);
+                    }
                 }
                 //Point changePoint = new Point(e.Location.X - startPosition.X,
                 //                  e.Location.Y - startPosition.Y);
@@ -243,36 +266,7 @@ namespace ManageImage
             }
 
         }
-        private void dgvListArea_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            if (CurrentArea != null)
-            {
-                if (CurrentArea.ListGrid == null || CurrentArea.ListGrid.Count == 0)
-                {
-                    MessageBox.Show(@"You must completed the region before.", @"Warning", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                }
-                else if (CurrentArea.ListFileTemplates == null || CurrentArea.ListFileTemplates.Count == 0)
-                {
-                    MessageBox.Show(@"You must completed the region before.", @"Warning", MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                }
-                else if (IsRegionOverlap())
-                {
-                    MessageBox.Show(@"Current Area is overlayed. Please select another region.", @"Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                    e.Cancel = true;
-                }
-                else
-                {
-                    SaveCurrentArea(CurrentArea);
-                }
 
-            }
-        }
         #endregion
         #region Menu
         private void enableEditionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -315,9 +309,9 @@ namespace ManageImage
             //isEditable = true;
             //enableEditionToolStripMenuItem.Enabled = false;
             //isDrawDisplayArea = true;
+            index = 0;
             //panel1.Focus();
             //panel1.Invalidate();
-            index = 0;
         }
         #endregion
         #region Button
@@ -414,21 +408,11 @@ namespace ManageImage
         }
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (CurrentArea != null && isEditable)
+            if (map == null)
             {
-                if (CurrentArea.Width > 0 && CurrentArea.Height > 0)
-                {
-
-                    CurrentArea.ListImages = new List<Image>();
-                    FormEdit frm1 = new FormEdit(CurrentArea);
-                    frm1.ShowDialog();
-                }
-                else
-                {
-                    MessageBox.Show(@"You must create display area to continue.", @"Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                }
+                map = new frmMAP();
             }
+            map.ShowDialog();
         }
         #endregion
         #endregion
@@ -461,9 +445,9 @@ namespace ManageImage
         private void ResetGridPanel(int cellSize)
         {
             gridMaps = new List<Cell>();
-            for (int y = 0; y <= h; ++y)
+            for (int y = 0; y < height; ++y)
             {
-                for (int k = 0; k <= w; k++)
+                for (int k = 0; k < width; k++)
                 {
                     var cell = new Cell()
                     {
@@ -481,22 +465,11 @@ namespace ManageImage
         {
             if (listCells != null && listCells.Count > 0)
             {
-                var minX = listCells[0].StartPosition.X;
-                var maxX = listCells[0].StartPosition.X;
-                foreach (var cell in listCells)
-                {
-                    if (cell.StartPosition.X <= minX)
-                    {
-                        minX = cell.StartPosition.X;
-                    }
-                    if (cell.StartPosition.X >= maxX)
-                    {
-                        maxX = cell.StartPosition.X;
-                    }
-                }
+                var minX = listCells.Min(m => m.X);
+                var maxX = listCells.Max(m => m.X);
+                CurrentArea.Width = maxX - minX + 1;
                 CurrentArea.X = minX;
-                //CurrentArea.Width = maxX - minX + _cellSize;
-                return (maxX - minX) / CellSize;
+                return CurrentArea.Width;
             }
             return 0;
         }
@@ -504,22 +477,11 @@ namespace ManageImage
         {
             if (listCells != null && listCells.Count > 0)
             {
-                var minY = listCells[0].StartPosition.Y;
-                var maxY = listCells[0].StartPosition.Y;
-                foreach (var cell in listCells)
-                {
-                    if (cell.StartPosition.Y <= minY)
-                    {
-                        minY = cell.StartPosition.Y;
-                    }
-                    if (cell.StartPosition.Y >= maxY)
-                    {
-                        maxY = cell.StartPosition.Y;
-                    }
-                }
+                var minY = listCells.Min(m => m.Y);
+                var maxY = listCells.Max(m => m.Y);
+                CurrentArea.Height = maxY - minY + 1;
                 CurrentArea.Y = minY;
-                //CurrentArea.Height = maxY - minY + _cellSize;
-                return (maxY - minY) / CellSize;
+                return CurrentArea.Height;
             }
             return 0;
         }
@@ -714,14 +676,11 @@ namespace ManageImage
                             Frames.DisplayAreas.Add(ListAreas[i]);
                             var img = ListAreas[i].ListImages[index];
                             Bitmap bm = new Bitmap(img);
-                            for (int x = 0; x < img.Width; x++)
+                            foreach (var cell in ListAreas[i].ListGrid)
                             {
-                                for (int y = 0; y < img.Height; y++)
-                                {
-                                    Color color = bm.GetPixel(x, y);
-                                    ListAreas[i].ListGrid[y * img.Width + x].Color = color;
-                                    Frames.ListGrid.Add(ListAreas[i].ListGrid[y * img.Width + x]);
-                                }
+                                var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
+                                cell.Color = color;
+                                Frames.ListGrid.Add(cell);
                             }
                         }
                     }
@@ -739,17 +698,64 @@ namespace ManageImage
         private void trkbGridSize_ValueChanged(object sender, EventArgs e)
         {
             CellSize = trkbGridSize.Value;
-            ResetGridPanel(CellSize);
-            //isDrawDisplayArea = false;
+            if (map != null)
+            {
+                width = (short)(maxX - minX + 1);
+                height = (short)(maxY - minY + 1);
+                //panel1.Height = CellSize * h;
+                //panel1.Width = CellSize * w;
+                ResetGridPanel(CellSize);
+                if (line1 != null)
+                {
+                    if (line2 != null)
+                    {
+                        if (line2.Count > line1.Count)
+                        {
+                            //draw line2:
+                            var newList = new List<Cell>();
+                            foreach (var point in line2)
+                            {
+                                var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
+                                newList.AddRange(cells);
+                            }
+                            gridMaps.Clear();
+                            gridMaps.AddRange(newList);
+                        }
+                        else
+                        {
+                            //draw line1:
+                            var newList = new List<Cell>();
+                            foreach (var point in line1)
+                            {
+                                var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
+                                newList.AddRange(cells);
+                            }
+                            gridMaps.Clear();
+                            gridMaps.AddRange(newList);
+                        }
+                    }
+                    else
+                    {
+                        //draw line1:
+                        var newList = new List<Cell>();
+                        foreach (var point in line1)
+                        {
+                            var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
+                            newList.AddRange(cells);
+                        }
+                        gridMaps.Clear();
+                        gridMaps.AddRange(newList);
+                    }
+                }
+            }
+            else
+            {
+                ResetGridPanel(CellSize);
+            }
             foreach (var area in ListAreas)
             {
                 area.ListGrid = UpdateListGrid(area.ListGrid);
             }
-            //if (myBuffer != null)
-            //    myBuffer.Dispose();
-            //myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
-            //                                   this.panel1.DisplayRectangle);
-            //panel1.Dispose();
             if (dgvListArea.CurrentRow != null && dgvListArea.CurrentRow.Cells[0].Value != null)
             {
                 isDrawDisplayArea = true;
@@ -761,8 +767,6 @@ namespace ManageImage
                 CurrentArea = null;
                 isDrawDisplayArea = false;
             }
-            panel1.Width = CellSize*w;
-            panel1.Height = CellSize*h;
             panel1.Invalidate();
         }
 
@@ -771,10 +775,10 @@ namespace ManageImage
             foreach (var cell in listGrid)
             {
                 cell.Size = CellSize;
-                cell.StartPosition = new Point(cell.X*CellSize,cell.Y*CellSize);
+                cell.StartPosition = new Point(cell.X * CellSize, cell.Y * CellSize);
             }
             return listGrid;
-        } 
+        }
 
         private void Main_Resize(object sender, EventArgs e)
         {
@@ -793,6 +797,90 @@ namespace ManageImage
         private void panel2_Scroll(object sender, ScrollEventArgs e)
         {
             panel1.Invalidate();
+        }
+
+        #region Public method
+
+        public void ReSizePanel()
+        {
+            width = (short)(maxX - minX + 1);
+            height = (short)(maxY - minY + 1);
+            //panel1.Height = CellSize * h;
+            //panel1.Width = CellSize * w;
+            ResetGridPanel(CellSize);
+            if (line1 != null)
+            {
+                if (line2 != null)
+                {
+                    if (line2.Count > line1.Count)
+                    {
+                        //draw line2:
+                        var newList = new List<Cell>();
+                        foreach (var point in line2)
+                        {
+                            var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
+                            newList.AddRange(cells);
+                        }
+                        gridMaps.Clear();
+                        gridMaps.AddRange(newList);
+                    }
+                    else
+                    {
+                        //draw line1:
+                        var newList = new List<Cell>();
+                        foreach (var point in line1)
+                        {
+                            var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
+                            newList.AddRange(cells);
+                        }
+                        gridMaps.Clear();
+                        gridMaps.AddRange(newList);
+                    }
+                }
+                else
+                {
+                    //draw line1:
+                    var newList = new List<Cell>();
+                    foreach (var point in line1)
+                    {
+                        var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY ).ToList();
+                        newList.AddRange(cells);
+                    }
+                    gridMaps.Clear();
+                    gridMaps.AddRange(newList);
+                }
+            }
+            panel1.Invalidate();
+        }
+        #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (ListAreas.Count > 0)
+            {
+                if (CurrentArea == null)
+                {
+                    T.Start();
+                    isPlay = true;
+                    trkbGridSize.Enabled = false;
+                }
+                else
+                {
+                    MessageBox.Show(@"You must Save before.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            isPlay = false;
+            T.Stop();
+            //isEditable = true;
+            //enableEditionToolStripMenuItem.Enabled = false;
+            //isDrawDisplayArea = true;
+            index = 0;
+            //panel1.Focus();
+            //panel1.Invalidate();
         }
     }
 }

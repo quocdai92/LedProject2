@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlMoverOrResizer.cs" />
+    <Compile Include="DinhNghia.cs" />
     <Compile Include="DisplayArea.cs" />
     <Compile Include="EncDec.cs" />
     <Compile Include="FileImage.cs" />
@@ -59,6 +60,12 @@
       <DependentUpon>FormEdit.cs</DependentUpon>
     </Compile>
     <Compile Include="Frames.cs" />
+    <Compile Include="frmMAP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMAP.designer.cs">
+      <DependentUpon>frmMAP.cs</DependentUpon>
+    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,8 +74,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ToaDo.cs" />
     <EmbeddedResource Include="FormEdit.resx">
       <DependentUpon>FormEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMAP.resx">
+      <DependentUpon>frmMAP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

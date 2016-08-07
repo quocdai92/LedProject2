@@ -41,8 +41,11 @@
             this.trkbGridSize = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
             this.btnDelete = new System.Windows.Forms.Button();
-            this.btnEdit = new System.Windows.Forms.Button();
+            this.btnMap = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.cbkAutoScroll = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvListArea)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -141,6 +144,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button2);
+            this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.trkbGridSize);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(13, 393);
@@ -183,16 +188,15 @@
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
-            // btnEdit
+            // btnMap
             // 
-            this.btnEdit.Location = new System.Drawing.Point(57, 46);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(47, 23);
-            this.btnEdit.TabIndex = 8;
-            this.btnEdit.Text = "Edit";
-            this.btnEdit.UseVisualStyleBackColor = true;
-            this.btnEdit.Visible = false;
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnMap.Location = new System.Drawing.Point(57, 46);
+            this.btnMap.Name = "btnMap";
+            this.btnMap.Size = new System.Drawing.Size(47, 23);
+            this.btnMap.TabIndex = 8;
+            this.btnMap.Text = "MAP";
+            this.btnMap.UseVisualStyleBackColor = true;
+            this.btnMap.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // panel2
             // 
@@ -208,13 +212,44 @@
             this.panel2.TabIndex = 9;
             this.panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panel2_Scroll);
             // 
+            // cbkAutoScroll
+            // 
+            this.cbkAutoScroll.AutoSize = true;
+            this.cbkAutoScroll.Location = new System.Drawing.Point(217, 51);
+            this.cbkAutoScroll.Name = "cbkAutoScroll";
+            this.cbkAutoScroll.Size = new System.Drawing.Size(96, 17);
+            this.cbkAutoScroll.TabIndex = 10;
+            this.cbkAutoScroll.Text = "Tự Động Cuộn";
+            this.cbkAutoScroll.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(16, 109);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(113, 109);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "button2";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(988, 570);
+            this.Controls.Add(this.cbkAutoScroll);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.btnEdit);
+            this.Controls.Add(this.btnMap);
             this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnSave);
@@ -225,6 +260,7 @@
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Main";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Resize += new System.EventHandler(this.Main_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.dgvListArea)).EndInit();
             this.menuStrip1.ResumeLayout(false);
@@ -241,7 +277,7 @@
 
         #endregion
 
-        private FormEdit.overRidePanel panel1;
+        public FormEdit.overRidePanel panel1;
         private System.Windows.Forms.DataGridView dgvListArea;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
@@ -254,7 +290,10 @@
         private System.Windows.Forms.TrackBar trkbGridSize;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.ToolStripMenuItem enableEditionToolStripMenuItem;
-        private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Button btnMap;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.CheckBox cbkAutoScroll;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
     }
 }

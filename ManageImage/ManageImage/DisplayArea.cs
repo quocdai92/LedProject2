@@ -28,6 +28,7 @@ namespace ManageImage
         public List<Image> ListImages { get; set; }
         public List<FileTemplate> ListFileTemplates { get; set; }
         public int TimePlay { get; set; }
+        public int Angle { get; set; }
     }
 
     public class Cell
@@ -37,7 +38,7 @@ namespace ManageImage
         public Color Color { get; set; }
         //pixel location x
         public int X { get; set; }
-        //pixel locaiton y
+        //pixel location y
         public int Y { get; set; }
 
     }

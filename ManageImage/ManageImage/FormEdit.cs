@@ -31,6 +31,7 @@ namespace ManageImage
         private int y = 0;
         private int width = 0;
         private int height = 0;
+        private int angle = 0;
         public static DataTable Table = new DataTable()
         {
             Columns = { "FileName", "TimePlay (s)" }
@@ -56,6 +57,7 @@ namespace ManageImage
         {
             widthShow = area.Width * cellSize;
             heightShow = area.Height * cellSize;
+            
             cellX = area.Width;
             cellY = area.Height;
             color = area.Color;
@@ -90,12 +92,14 @@ namespace ManageImage
             currentContext = BufferedGraphicsManager.Current;
             x = panel1.Width / 2;
             y = panel1.Height / 2;
+            this.panel1.Width = widthShow;
+            this.panel1.Height = heightShow;
             dataGridView1.DataSource = Table;
             dataGridView1.Columns[0].Width = (int)dataGridView1.Width * 2 / 3;
             dataGridView1.Columns[1].Width = (int)dataGridView1.Width / 3;
             dataGridView1.ReadOnly = false;
             dataGridView1.Columns[0].ReadOnly = true;
-
+            comboBox1.SelectedIndex = comboBox1.FindStringExact(area.Angle.ToString());
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 row.HeaderCell.Value = String.Format("{0}", row.Index + 1);
@@ -173,7 +177,14 @@ namespace ManageImage
                 }
                 else
                 {
-                    myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                    //myBuffer.Graphics.DrawImage(bitmap, drawRect);
+                    myBuffer.Graphics.FillRectangle(new SolidBrush(Color.Black), showRect);
+                    for (int j = 0; j < cellY; j++)
+                        for (int i = 0; i < cellX; i++)
+                        {
+                            brushCell = new SolidBrush(Color.Gray);
+                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize, showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
+                        }
                 }
             }
 
@@ -332,9 +343,18 @@ namespace ManageImage
         private List<Image> createListImageCrop(List<Image> listImgOrg)
         {
             List<Image> listImgCrop = new List<Image>();
-
+            RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
+            switch (angle)
+            {
+                case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
+                case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
+                case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
+                case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
+            }
             foreach (Image img in listImgOrg)
             {
+                //rotate:
+                img.RotateFlip(rotateFlipType);
                 Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
                 Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
                 if (drawRect.IntersectsWith(drawRect))
@@ -362,8 +382,17 @@ namespace ManageImage
                 Int32.TryParse(dataGridView1.CurrentRow.Cells[1].Value.ToString(), out timeplay);
                 List<Image> listImg = new List<Image>();
                 var listImageFile = readFileTmp(filename);
+                RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
+                switch (angle)
+                {
+                    case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
+                    case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
+                    case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
+                    case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
+                }
                 foreach (Image img in listImageFile)
                 {
+                    img.RotateFlip(rotateFlipType);
                     Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
                     Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
                     if (drawRect.IntersectsWith(drawRect))
@@ -405,8 +434,17 @@ namespace ManageImage
                     Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
                     List<Image> listImg = new List<Image>();
                     var listImageFile = readFileTmp(filename);
+                    RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
+                    switch (angle)
+                    {
+                        case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
+                        case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
+                        case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
+                        case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
+                    }
                     foreach (Image img in listImageFile)
                     {
+                        img.RotateFlip(rotateFlipType);
                         Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
                         Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
                         if (drawRect.IntersectsWith(drawRect))
@@ -416,6 +454,15 @@ namespace ManageImage
 
                             var cropImg = cropImage(resizeImage(img, width, height), cropRect);
                             var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
+                            //Bitmap returnBitmap = new Bitmap(cellImg.Width, cellImg.Height);
+                            //Graphics graphics = Graphics.FromImage(returnBitmap);
+                            //graphics.TranslateTransform((float)cellImg.Width / 2, (float)cellImg.Height / 2);
+                            //graphics.RotateTransform(angle);
+                            //graphics.TranslateTransform(-(float)cellImg.Width / 2, -(float)cellImg.Height / 2);
+                            //graphics.DrawImage(cellImg, new Point(0, 0));
+                            
+                            //cellImg.
+                            //return returnBitmap;
                             listImg.Add(cellImg);
                         }
                     }
@@ -552,6 +599,7 @@ namespace ManageImage
                 progressBarSave.PerformLayout();
             }
             Main.CurrentArea.TimePlay = timePlay;
+            Main.CurrentArea.Angle = angle;
             MessageBox.Show(@"Save successfully!", @"Save");
             //Main.GetListImageOfArea(Main.CurrentArea);
             this.Dispose();
@@ -587,7 +635,7 @@ namespace ManageImage
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Cells[0].Value.ToString() != "")
+            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Cells[0].Value!= null && dataGridView1.CurrentRow.Cells[0].Value.ToString() != "")
             {
                 var filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
                 ListImage = new List<Image>();
@@ -632,6 +680,14 @@ namespace ManageImage
                 isStart = true;
                 T.Start();
             }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            angle = Convert.ToInt32(comboBox1.SelectedItem);
+            var listImage = createListAllImage();
+            ListImage = new List<Image>();
+            ListImage.AddRange(listImage);
         }
     }
 }

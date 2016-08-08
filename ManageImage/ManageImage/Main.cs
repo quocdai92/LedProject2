@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -65,6 +66,8 @@ namespace ManageImage
         public static DataTable ListAreaTable;
         public static int Interval = 50;
         public static Frames Frames;
+        public static List<Frames> ListFrames;
+        public bool isPlayAsFrame;
         public static Timer T = new Timer()
         {
             Interval = Interval
@@ -72,8 +75,8 @@ namespace ManageImage
 
         private frmMAP map;
         public int minX, minY, maxX, maxY;
-        public List<Point> line1; 
-        public List<Point> line2; 
+        public List<Point> line1;
+        public List<Point> line2;
         //public static List<FileTemplate> ListFileTemplates = new List<FileTemplate>(); 
 
         #region Event Handle
@@ -306,6 +309,7 @@ namespace ManageImage
         {
             isPlay = false;
             T.Stop();
+            isPlayAsFrame = false;
             //isEditable = true;
             //enableEditionToolStripMenuItem.Enabled = false;
             //isDrawDisplayArea = true;
@@ -577,14 +581,14 @@ namespace ManageImage
             int timeTotal = 0;
             foreach (var file in listFile)
             {
-                if (file.ListImages != null && file.ListImages.Count > 0)
+                if (file.ListImageReturn != null && file.ListImageReturn.Count > 0)
                 {
                     timeTotal += file.TimePlay;
                     var countImge = file.TimePlay * 1000 / Interval;
                     for (int i = 0; i < countImge; i++)
                     {
-                        var idx = i % file.ListImages.Count;
-                        listImg.Add(file.ListImages[idx]);
+                        var idx = i % file.ListImageReturn.Count;
+                        listImg.Add(file.ListImageReturn[idx]);
                     }
                 }
             }
@@ -669,21 +673,29 @@ namespace ManageImage
             {
                 if (ii >= 0 && index < ListAreas[ii].ListImages.Count)
                 {
-                    for (int i = 0; i < ListAreas.Count; i++)
+                    if (isPlayAsFrame)
                     {
-                        if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
+                        Frames.ListGrid.AddRange(ListFrames[index].ListGrid);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < ListAreas.Count; i++)
                         {
-                            Frames.DisplayAreas.Add(ListAreas[i]);
-                            var img = ListAreas[i].ListImages[index];
-                            Bitmap bm = new Bitmap(img);
-                            foreach (var cell in ListAreas[i].ListGrid)
+                            if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
                             {
-                                var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
-                                cell.Color = color;
-                                Frames.ListGrid.Add(cell);
+                                //Frames.DisplayAreas.Add(ListAreas[i]);
+                                var img = ListAreas[i].ListImages[index];
+                                Bitmap bm = new Bitmap(img);
+                                foreach (var cell in ListAreas[i].ListGrid)
+                                {
+                                    var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
+                                    cell.Color = color;
+                                    Frames.ListGrid.Add(cell);
+                                }
                             }
                         }
                     }
+                    
                     index++;
                 }
                 else
@@ -799,14 +811,26 @@ namespace ManageImage
             panel1.Invalidate();
         }
 
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportData();
+            isPlayAsFrame = true;
+        }
+
         #region Public method
 
         public void ReSizePanel()
         {
             width = (short)(maxX - minX + 1);
             height = (short)(maxY - minY + 1);
-            //panel1.Height = CellSize * h;
-            //panel1.Width = CellSize * w;
+            if (width * height < gridMaps.Count)
+            {
+                foreach (var displayArea in ListAreas)
+                {
+                    displayArea.ListGrid.Clear();
+                }
+            }
+
             ResetGridPanel(CellSize);
             if (line1 != null)
             {
@@ -843,44 +867,75 @@ namespace ManageImage
                     var newList = new List<Cell>();
                     foreach (var point in line1)
                     {
-                        var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY ).ToList();
+                        var cells = gridMaps.Where(m => m.X == point.X - minX && m.Y == point.Y - minY).ToList();
                         newList.AddRange(cells);
                     }
                     gridMaps.Clear();
                     gridMaps.AddRange(newList);
                 }
             }
+            //panel1.Height = CellSize * h;
+            //panel1.Width = CellSize * w;
             panel1.Invalidate();
         }
-        #endregion
 
-        private void button1_Click(object sender, EventArgs e)
+        public void ClearMap()
         {
-            if (ListAreas.Count > 0)
+            gridMaps.Clear();
+            foreach (var displayArea in ListAreas)
             {
-                if (CurrentArea == null)
+                displayArea.ListGrid.Clear();
+            }
+            panel1.Invalidate();
+        }
+
+        public void ExportData()
+        {
+            //int idx;
+            var lstFrames = new List<Frames>();
+            var maxFrame = ListAreas[0].ListImages.Count;
+            for (int idx = 0; idx < maxFrame; idx++)
+            {
+                var frame = new Frames()
                 {
-                    T.Start();
-                    isPlay = true;
-                    trkbGridSize.Enabled = false;
+                    ListGrid = new List<Cell>()
+                };
+                foreach (DisplayArea area in ListAreas)
+                {
+                    if (area.AreaId > 0 && area.ListGrid.Count > 0 && area.ListImages.Count > 0)
+                    {
+                        var img = area.ListImages[idx];
+                        Bitmap bm = new Bitmap(img);
+                        foreach (var cell in area.ListGrid)
+                        {
+                            var color = bm.GetPixel(cell.X - area.X, cell.Y - area.Y);
+                            cell.Color = color;
+                            frame.ListGrid.Add(cell);
+                        }
+                    }
                 }
-                else
+                lstFrames.Add(frame);
+            }
+            ListFrames = new List<Frames>();
+            ListFrames.AddRange(lstFrames);
+            //save to file:
+            List<byte> fileToSave = new List<byte>();
+            foreach (var frame in ListFrames)
+            {
+                foreach (var cell in frame.ListGrid)
                 {
-                    MessageBox.Show(@"You must Save before.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    var r = (byte)cell.Color.R;
+                    var g = (byte)cell.Color.G;
+                    var b = (byte)cell.Color.B;
+                    fileToSave.Add(r);
+                    fileToSave.Add(g);
+                    fileToSave.Add(b);
                 }
             }
+            var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
+            fileToSave.AddRange(numberLed);
+            //File.WriteAllBytes(@"D:\Dai\Template\file.mgc",fileToSave.ToArray());
         }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            isPlay = false;
-            T.Stop();
-            //isEditable = true;
-            //enableEditionToolStripMenuItem.Enabled = false;
-            //isDrawDisplayArea = true;
-            index = 0;
-            //panel1.Focus();
-            //panel1.Invalidate();
-        }
+        #endregion
     }
 }

@@ -18,96 +18,93 @@ namespace ManageImage
     {
         public class overRidePanel : Panel
         {
-            protected override void OnPaintBackground(PaintEventArgs pevent) { }
+            protected override void OnPaintBackground(PaintEventArgs pevent)
+            {
+            }
         }
 
         private static int interval = 50;
+
         public static Timer T = new Timer()
         {
             Interval = interval
         };
+
         public string Key = "ledproject";
         private int x = 0;
         private int y = 0;
         private int width = 0;
         private int height = 0;
         private int angle = 0;
-        public static DataTable Table = new DataTable()
-        {
-            Columns = { "FileName", "TimePlay (s)" }
-        };
-        Bitmap bitmap;
-        BufferedGraphicsContext currentContext;
-        BufferedGraphics myBuffer;
-        PointF viewPortCenter;
-        bool draging;
-        Point lastMouse;
+        //public static DataTable Table = new DataTable()
+        //{
+        //    Columns = { "FileName", "TimePlay (s)" }
+        //};
+        private Bitmap bitmap;
+        private BufferedGraphicsContext currentContext;
+        private BufferedGraphics myBuffer;
+        private PointF viewPortCenter;
+        private bool draging;
+        private Point lastMouse;
         private List<Image> ListImage;
-        private List<FileTemplate> listFile = new List<FileTemplate>();
-        private int index;
+        private List<FileTemplate> ListFile;
+        private FileTemplate CurrentFileTemplate;
+        private int index = 0;
         private int widthShow;
         private int heightShow;
         private Image firstImage;
         private bool isStart;
         private int cellSize = Main.CellSize;
-        private string color;
-        private int cellX;
-        private int cellY;
+        //private int cellX;
+        //private int cellY;
         public FormEdit(DisplayArea area)
         {
-            widthShow = area.Width * cellSize;
-            heightShow = area.Height * cellSize;
-            
-            cellX = area.Width;
-            cellY = area.Height;
-            color = area.Color;
-            Table.Rows.Clear();
+            InitializeComponent();
+            currentContext = BufferedGraphicsManager.Current;
+            T.Tick += slider;
+            index = 0;
+            widthShow = area.Width;
+            heightShow = area.Height;
+            panel1.Width = widthShow * cellSize;
+            panel1.Height = heightShow * cellSize;
+            dataGridView1.Columns.Add("FileName", "FileName");
+            dataGridView1.Columns.Add("TimePlay", "TimePlay");
+            dataGridView1.Columns[0].Width = dataGridView1.Width * 2 / 3;
+            dataGridView1.Columns[1].Width = dataGridView1.Width / 3;
+            dataGridView1.ReadOnly = false;
+            dataGridView1.Columns[0].ReadOnly = true;
+            ListFile = new List<FileTemplate>();
             if (area.ListFileTemplates != null && area.ListFileTemplates.Count > 0)
             {
                 foreach (var file in area.ListFileTemplates)
                 {
                     if (bitmap == null)
                     {
-                        var listImg = readFileTmp(file.FileName);
-                        if (listImg.Count > 0)
-                        {
-                            firstImage = listImg.ElementAt(0);
-                            bitmap = (Bitmap)(firstImage);
-                            height = heightShow;
-                            width = widthShow;                           
-                            //setup(true);
-                            //setFileInfo();
-                            //panel1.Invalidate();
-
-                        }
+                        firstImage = file.ListImages.ElementAt(0);
+                        bitmap = (Bitmap)(firstImage);
+                        setup(true);
+                        //setFileInfo();
+                        panel1.Invalidate();
                     }
-                    Table.Rows.Add(new object[] { file.FileName, file.TimePlay });
+                    x = file.X;
+                    y = file.Y;
+                    height = heightShow;
+                    width = widthShow;
+                    ListFile.Add(file);
+                    //Table.Rows.Add(new object[] { fileName, 10 });
+                    var idx = dataGridView1.Rows.Add(file.FileName, "10");
+                    dataGridView1.Rows[idx].HeaderCell.Value = String.Format("{0}", idx + 1);
                 }
+                ListImage = ListFile[0].ListImageReturn;
             }
-            if (area.ListImages != null)
-            {
-                ListImage = area.ListImages;
-            }
-            InitializeComponent();
-            currentContext = BufferedGraphicsManager.Current;
-            x = panel1.Width / 2;
-            y = panel1.Height / 2;
-            this.panel1.Width = widthShow;
-            this.panel1.Height = heightShow;
-            dataGridView1.DataSource = Table;
-            dataGridView1.Columns[0].Width = (int)dataGridView1.Width * 2 / 3;
-            dataGridView1.Columns[1].Width = (int)dataGridView1.Width / 3;
-            dataGridView1.ReadOnly = false;
-            dataGridView1.Columns[0].ReadOnly = true;
-            comboBox1.SelectedIndex = comboBox1.FindStringExact(area.Angle.ToString());
+
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 row.HeaderCell.Value = String.Format("{0}", row.Index + 1);
             }
-            setup(true);
-            if (bitmap != null)
-                setFileInfo();
-            T.Tick += slider;
+            //if (bitmap != null)
+            //    setFileInfo();
+
         }
 
         private void setup(bool resetViewport)
@@ -115,13 +112,14 @@ namespace ManageImage
             if (myBuffer != null)
                 myBuffer.Dispose();
             myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
-                                               this.panel1.DisplayRectangle);
+                this.panel1.DisplayRectangle);
             if (bitmap != null)
             {
                 if (resetViewport)
                 {
                     if (width == 0 || height == 0)
-                        SetViewPort(new RectangleF(x - bitmap.Width / 2.0f, y - bitmap.Height / 2.0f, bitmap.Width, bitmap.Height));
+                        SetViewPort(new RectangleF(x - bitmap.Width / 2.0f, y - bitmap.Height / 2.0f, bitmap.Width,
+                            bitmap.Height));
                     else
                     {
                         SetViewPort(new RectangleF(x - width / 2.0f, y - height / 2.0f, width, height));
@@ -131,27 +129,28 @@ namespace ManageImage
             this.panel1.Focus();
             this.panel1.Invalidate();
         }
+
         private void SetViewPort(RectangleF worldCords)
         {
             viewPortCenter = new PointF(worldCords.X + (worldCords.Width / 2.0f),
-                                        worldCords.Y + (worldCords.Height / 2.0f));
+                worldCords.Y + (worldCords.Height / 2.0f));
 
         }
 
-        private void PaintImage(int widthShow, int heightShow, int width, int height)
+        private void PaintImage(int wS, int hS, int w, int h)
         {
-            Rectangle drawRect = new Rectangle(
-                (int)(viewPortCenter.X - width / 2.0f),
-                (int)(viewPortCenter.Y - height / 2.0f),
-                (int)(width),
-                (int)(height));
+            //Rectangle drawRect = new Rectangle(
+            //    (int)(viewPortCenter.X - width / 2.0f),
+            //    (int)(viewPortCenter.Y - height / 2.0f),
+            //    (int)(width),
+            //    (int)(height));
             //this.toolStripStatusLabel1.Text = "DrawRect = " + drawRect.ToString();
 
-            Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f),
-                (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+            Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - wS / 2.0f),
+                (int)(panel1.Height / 2.0f - hS / 2.0f), wS, hS);
 
             myBuffer.Graphics.Clear(Color.White); //Clear the Back buffer
-                                                  //Draw the image, Write image to back buffer, and render back buffer              
+            //Draw the image, Write image to back buffer, and render back buffer              
             //Pen pen = new Pen(Color.Black);
             //pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
             ////if (bitmap != null)
@@ -168,31 +167,36 @@ namespace ManageImage
                 if (isStart)
                 {
                     myBuffer.Graphics.FillRectangle(new SolidBrush(Color.Black), showRect);
-                    for (int j = 0; j < cellY; j++)
-                        for (int i = 0; i < cellX; i++)
+                    for (int j = 0; j < heightShow; j++)
+                        for (int i = 0; i < widthShow; i++)
                         {
                             brushCell = new SolidBrush(bitmap.GetPixel(i, j));
-                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize, showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
+                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize,
+                                showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
                         }
                 }
                 else
                 {
                     //myBuffer.Graphics.DrawImage(bitmap, drawRect);
                     myBuffer.Graphics.FillRectangle(new SolidBrush(Color.Black), showRect);
-                    for (int j = 0; j < cellY; j++)
-                        for (int i = 0; i < cellX; i++)
+                    for (int j = 0; j < heightShow; j++)
+                        for (int i = 0; i < widthShow; i++)
                         {
                             brushCell = new SolidBrush(Color.Gray);
-                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize, showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
+                            myBuffer.Graphics.FillEllipse(brushCell, showRect.X + cellSize / 6 + i * cellSize,
+                                showRect.Y + cellSize / 6 + j * cellSize, 2 * cellSize / 3, 2 * cellSize / 3);
                         }
                 }
             }
 
-                        
-            myBuffer.Graphics.FillRectangle(brush, 0, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
-            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 + widthShow / 2, 0, panel1.Width / 2 - widthShow / 2, panel1.Height);
-            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 - widthShow / 2, 0, widthShow, panel1.Height / 2 - heightShow / 2);
-            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 - widthShow / 2, panel1.Height / 2 + heightShow / 2, widthShow, panel1.Height / 2 - heightShow / 2);
+
+            myBuffer.Graphics.FillRectangle(brush, 0, 0, panel1.Width / 2 - wS / 2, panel1.Height);
+            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 + wS / 2, 0, panel1.Width / 2 - wS / 2,
+                panel1.Height);
+            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 - wS / 2, 0, wS,
+                panel1.Height / 2 - hS / 2);
+            myBuffer.Graphics.FillRectangle(brush, panel1.Width / 2 - wS / 2, panel1.Height / 2 + hS / 2,
+                wS, panel1.Height / 2 - hS / 2);
 
             myBuffer.Render(this.panel1.CreateGraphics());
 
@@ -201,7 +205,6 @@ namespace ManageImage
         public List<Image> readFileTmp(string filename)
         {
             List<Image> listImg = new List<Image>();
-
             var fileTobyte = File.ReadAllBytes(filename);
             var readFile = EncDec.Decrypt(fileTobyte, Key);
             int from = 0;
@@ -228,7 +231,6 @@ namespace ManageImage
                     from = i + 3;
                 }
             }
-
             return listImg;
         }
 
@@ -236,49 +238,50 @@ namespace ManageImage
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Multiselect = true;
+            ListFile = new List<FileTemplate>();
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 foreach (var fileName in openFileDialog1.FileNames)
                 {
+                    var listImg = readFileTmp(fileName);
                     if (bitmap == null)
                     {
-                        var listImg = readFileTmp(fileName);
-                        ListImage.AddRange(listImg);
-                        if (listImg.Count > 0)
-                        {
-                            firstImage = listImg.ElementAt(0);
-                            bitmap = (Bitmap)(firstImage);
-                            x = panel1.Width / 2;
-                            y = panel1.Height / 2;
-                            height = heightShow;
-                            width = widthShow;
-                            setup(true);
-                            setFileInfo();
-                            panel1.Invalidate();
-
-                        }
+                        firstImage = listImg.ElementAt(0);
+                        bitmap = (Bitmap)(firstImage);
+                        setup(true);
+                        //setFileInfo();
+                        panel1.Invalidate();
                     }
-                    Table.Rows.Add(new object[] { fileName, 10 });
-                }
-                dataGridView1.DataSource = Table;
-                dataGridView1.Columns[0].Width = (int)dataGridView1.Width * 2 / 3;
-                dataGridView1.Columns[1].Width = (int)dataGridView1.Width / 3;
-                dataGridView1.ReadOnly = false;
-                dataGridView1.Columns[0].ReadOnly = true;
-
-                foreach (DataGridViewRow row in dataGridView1.Rows)
-                {
-                    row.HeaderCell.Value = String.Format("{0}", row.Index + 1);
+                    x = 0;
+                    y = 0;
+                    height = heightShow;
+                    width = widthShow;
+                    ListFile.Add(new FileTemplate()
+                    {
+                        FileName = fileName,
+                        X = x,
+                        Y = y,
+                        Width = width,
+                        Height = height,
+                        Angle = angle,
+                        ListImages = listImg,
+                        TimePlay = 10
+                    });
+                    //Table.Rows.Add(new object[] { fileName, 10 });
+                    var idx = dataGridView1.Rows.Add(fileName, "10");
+                    dataGridView1.Rows[idx].HeaderCell.Value = String.Format("{0}", idx + 1);
                 }
             }
         }
+
         private void Form1_Resize(object sender, EventArgs e)
         {
             setup(false);
         }
+
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            PaintImage(widthShow, heightShow, width, height);
+            PaintImage(widthShow * cellSize, heightShow * cellSize, width * cellSize, height * cellSize);
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -287,18 +290,20 @@ namespace ManageImage
                 draging = true;
 
         }
+
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
 
             if (draging)
             {
-                viewPortCenter = new PointF(viewPortCenter.X - ((lastMouse.X - e.X)), viewPortCenter.Y - ((lastMouse.Y - e.Y)));
+                viewPortCenter = new PointF(viewPortCenter.X - ((lastMouse.X - e.X)),
+                    viewPortCenter.Y - ((lastMouse.Y - e.Y)));
                 panel1.Invalidate();
             }
             x = (int)viewPortCenter.X;
             y = (int)viewPortCenter.Y;
             lastMouse = e.Location;
-            setFileInfo();
+            //setFileInfo();
 
         }
 
@@ -343,24 +348,19 @@ namespace ManageImage
         private List<Image> createListImageCrop(List<Image> listImgOrg)
         {
             List<Image> listImgCrop = new List<Image>();
-            RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
-            switch (angle)
-            {
-                case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
-                case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
-                case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
-                case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
-            }
             foreach (Image img in listImgOrg)
             {
                 //rotate:
-                img.RotateFlip(rotateFlipType);
-                Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
-                Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
+                img.RotateFlip(GetRotateFlipType(angle));
+                Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f),
+                    (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+                Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f),
+                    (int)(viewPortCenter.Y - height / 2), width, height);
                 if (drawRect.IntersectsWith(drawRect))
                 {
                     var intersectRect = Rectangle.Intersect(showRect, drawRect);
-                    var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y, intersectRect.Width, intersectRect.Height);
+                    var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y,
+                        intersectRect.Width, intersectRect.Height);
 
                     var cropImg = cropImage(resizeImage(img, width, height), cropRect);
                     var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
@@ -382,23 +382,18 @@ namespace ManageImage
                 Int32.TryParse(dataGridView1.CurrentRow.Cells[1].Value.ToString(), out timeplay);
                 List<Image> listImg = new List<Image>();
                 var listImageFile = readFileTmp(filename);
-                RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
-                switch (angle)
-                {
-                    case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
-                    case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
-                    case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
-                    case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
-                }
                 foreach (Image img in listImageFile)
                 {
-                    img.RotateFlip(rotateFlipType);
-                    Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
-                    Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
+                    img.RotateFlip(GetRotateFlipType(angle));
+                    Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f),
+                        (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+                    Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f),
+                        (int)(viewPortCenter.Y - height / 2), width, height);
                     if (drawRect.IntersectsWith(drawRect))
                     {
                         var intersectRect = Rectangle.Intersect(showRect, drawRect);
-                        var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y, intersectRect.Width, intersectRect.Height);
+                        var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y,
+                            intersectRect.Width, intersectRect.Height);
 
                         var cropImg = cropImage(resizeImage(img, width, height), cropRect);
                         var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
@@ -413,7 +408,7 @@ namespace ManageImage
                     for (int i = 0; i < countLoop; i++)
                     {
                         var j = i % (coutImg);
-                        listImage.Add(resizeImage(listImg.ElementAt(j),cellX, cellY));
+                        listImage.Add(resizeImage(listImg.ElementAt(j), widthShow, heightShow));
                     }
                 }
 
@@ -434,35 +429,21 @@ namespace ManageImage
                     Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
                     List<Image> listImg = new List<Image>();
                     var listImageFile = readFileTmp(filename);
-                    RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
-                    switch (angle)
-                    {
-                        case 0: rotateFlipType = (RotateFlipType.RotateNoneFlipNone); break;
-                        case 90: rotateFlipType = (RotateFlipType.Rotate90FlipNone); break;
-                        case 180: rotateFlipType = (RotateFlipType.Rotate180FlipNone); break;
-                        case 270: rotateFlipType = (RotateFlipType.Rotate270FlipNone); break;
-                    }
                     foreach (Image img in listImageFile)
                     {
-                        img.RotateFlip(rotateFlipType);
-                        Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f), (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
-                        Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f), (int)(viewPortCenter.Y - height / 2), width, height);
+                        img.RotateFlip(GetRotateFlipType(angle));
+                        Rectangle showRect = new Rectangle((int)(panel1.Width / 2.0f - widthShow / 2.0f),
+                            (int)(panel1.Height / 2.0f - heightShow / 2.0f), widthShow, heightShow);
+                        Rectangle drawRect = new Rectangle((int)(viewPortCenter.X - width / 2.0f),
+                            (int)(viewPortCenter.Y - height / 2), width, height);
                         if (drawRect.IntersectsWith(drawRect))
                         {
                             var intersectRect = Rectangle.Intersect(showRect, drawRect);
-                            var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y, intersectRect.Width, intersectRect.Height);
+                            var cropRect = new Rectangle(intersectRect.X - drawRect.X, intersectRect.Y - drawRect.Y,
+                                intersectRect.Width, intersectRect.Height);
 
                             var cropImg = cropImage(resizeImage(img, width, height), cropRect);
                             var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
-                            //Bitmap returnBitmap = new Bitmap(cellImg.Width, cellImg.Height);
-                            //Graphics graphics = Graphics.FromImage(returnBitmap);
-                            //graphics.TranslateTransform((float)cellImg.Width / 2, (float)cellImg.Height / 2);
-                            //graphics.RotateTransform(angle);
-                            //graphics.TranslateTransform(-(float)cellImg.Width / 2, -(float)cellImg.Height / 2);
-                            //graphics.DrawImage(cellImg, new Point(0, 0));
-                            
-                            //cellImg.
-                            //return returnBitmap;
                             listImg.Add(cellImg);
                         }
                     }
@@ -474,7 +455,7 @@ namespace ManageImage
                         for (int i = 0; i < countLoop; i++)
                         {
                             var j = i % (coutImg);
-                            listImage.Add(resizeImage(listImg.ElementAt(j), cellX, cellY));
+                            listImage.Add(resizeImage(listImg.ElementAt(j), widthShow, heightShow));
                         }
                     }
                 }
@@ -484,23 +465,23 @@ namespace ManageImage
 
         private void slider(Object source, EventArgs e)
         {
-            if (index < ListImage.Count)
+            if (ListImage != null && index < ListImage.Count)
             {
                 //re-draw
                 bitmap = (Bitmap)ListImage[index];
-                setup(false);
+                //setup(false);
                 index++;
             }
             else
             {
-                isStart = false;
-                T.Stop();
+                //isStart = false;
+                //T.Stop();
                 index = 0;
-                ListImage.Clear();
-                bitmap = (Bitmap)firstImage;
-                isStart = false;
-                setup(true);
+                //ListImage.Clear();
+                //bitmap = (Bitmap)firstImage;
+                //setup(true);
             }
+            panel1.Invalidate();
         }
 
 
@@ -512,53 +493,91 @@ namespace ManageImage
             return returnImage;
         }
 
-
-        private void setFileInfo()
-        {
-            this.tbX.Text = Convert.ToInt32(x).ToString();
-            this.tbY.Text = Convert.ToInt32(y).ToString();
-            this.tbWidth.Text = Convert.ToInt32(width / cellSize).ToString();
-            this.tbHeight.Text = Convert.ToInt32(height / cellSize).ToString();
-
-        }
-
         private void tbX_TextChanged(object sender, EventArgs e)
         {
-            int temp;
-            if (int.TryParse(tbX.Text, out temp))
+            x = Convert.ToInt32(tbX.Text);
+            ListImage = new List<Image>();
+            if (CurrentFileTemplate != null)
             {
-                x = temp;
-                viewPortCenter.X = x;
-                panel1.Invalidate();
+                CurrentFileTemplate.X = x;
+                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                    heightShow - CurrentFileTemplate.Y);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
             }
         }
+
         private void tbY_TextChanged(object sender, EventArgs e)
         {
-            int temp;
-            if (int.TryParse(tbY.Text, out temp))
+            y = Convert.ToInt32(tbY.Text);
+            ListImage = new List<Image>();
+            if (CurrentFileTemplate != null)
             {
-                y = temp;
-                viewPortCenter.Y = y;
-                panel1.Invalidate();
+                CurrentFileTemplate.Y = y;
+                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                    heightShow - CurrentFileTemplate.Y);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
             }
         }
+
         private void tbWidth_TextChanged(object sender, EventArgs e)
         {
-            int temp;
-            if (int.TryParse(tbWidth.Text, out temp))
+            width = Convert.ToInt32(tbWidth.Text);
+            if (width < tbWidth.Minimum)
             {
-                width = temp * cellSize;
-                panel1.Invalidate();
+                width = Convert.ToInt32(tbWidth.Minimum);
+            }
+            ListImage = new List<Image>();
+            if (CurrentFileTemplate != null)
+            {
+                CurrentFileTemplate.Width = width;
+                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow,
+                    heightShow);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                //    CurrentFileTemplate.Height));
             }
         }
 
         private void tbHeight_TextChanged(object sender, EventArgs e)
         {
-            int temp;
-            if (int.TryParse(tbHeight.Text, out temp))
+            height = Convert.ToInt32(tbHeight.Text);
+            if (height < tbHeight.Minimum)
             {
-                height = temp * cellSize;
-                panel1.Invalidate();
+                height = Convert.ToInt32(tbHeight.Minimum);
+            }
+            ListImage = new List<Image>();
+            if (CurrentFileTemplate != null)
+            {
+                CurrentFileTemplate.Height = height;
+                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow,
+                    heightShow);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                //    CurrentFileTemplate.Height));
             }
         }
 
@@ -574,35 +593,26 @@ namespace ManageImage
             progressBarSave.Maximum = dataGridView1.Rows.Count;
             Main.CurrentArea.ListFileTemplates = new List<FileTemplate>();
             Main.CurrentArea.ListImages = new List<Image>();
-            var timePlay = 0;
-            foreach (DataGridViewRow row in dataGridView1.Rows)
+            if (CurrentFileTemplate != null)
             {
-                if (row.Cells[0].Value != null && !string.IsNullOrEmpty(row.Cells[0].Value.ToString()))
+                SaveCurrentFile();
+            }
+            var timePlay = 0;
+            foreach (var file in ListFile)
+            {
+                int timeplay = file.TimePlay;
+                if (file.ListImageReturn.Count == 0)
                 {
-                    string filename = row.Cells[0].Value.ToString();
-                    int timeplay = 0;
-                    Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
-
-                    var listImg = readFileTmp(filename);
-                    if (timeplay > 0 && listImg.Count > 0)
-                    {
-                        FileTemplate file = new FileTemplate();
-                        file.FileName = filename;
-                        file.TimePlay = timeplay;
-                        var listImgCrop = createListImageCrop(listImg);
-                        file.ListImages.AddRange(listImgCrop);
-                        Main.CurrentArea.ListFileTemplates.Add(file);
-                        timePlay += timeplay;
-                    }
-
+                    file.ListImageReturn = ReSizeListImage(file.ListImages, widthShow, heightShow);
                 }
+                Main.CurrentArea.ListFileTemplates.Add(file);
+                timePlay += timeplay;
                 progressBarSave.PerformLayout();
             }
             Main.CurrentArea.TimePlay = timePlay;
-            Main.CurrentArea.Angle = angle;
+            //Main.CurrentArea.Angle = angle;
             MessageBox.Show(@"Save successfully!", @"Save");
-            //Main.GetListImageOfArea(Main.CurrentArea);
-            this.Dispose();
+            //this.Dispose();
             this.Close();
         }
 
@@ -610,14 +620,12 @@ namespace ManageImage
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            isStart = true;
-            var listImage = createListImage();
-            ListImage = new List<Image>();
-            ListImage.AddRange(listImage);
-            if (ListImage.Count > 0)
+            if (ListImage != null && ListImage.Count > 0)
             {
+                //ListImage = new List<Image>(CurrentFileTemplate.ListImages);
                 isStart = true;
                 T.Start();
+                ListImage = CaculateListImage(CurrentFileTemplate.TimePlay);
             }
 
         }
@@ -627,7 +635,7 @@ namespace ManageImage
             isStart = false;
             T.Stop();
             index = 0;
-            ListImage.Clear();
+            //ListImage.Clear();
             bitmap = (Bitmap)firstImage;
             isStart = false;
             setup(true);
@@ -635,38 +643,32 @@ namespace ManageImage
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow != null && dataGridView1.CurrentRow.Cells[0].Value!= null && dataGridView1.CurrentRow.Cells[0].Value.ToString() != "")
+            if (CurrentFileTemplate != null)
             {
-                var filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
-                ListImage = new List<Image>();
-                index = 0;
-                T.Stop();
-                var listImg = readFileTmp(filename);
-
-                if (listImg.Count > 0)
-                {
-                    firstImage = listImg[0];
-                    bitmap = (Bitmap)(firstImage);
-                    setup(false);
-                }
+                SaveCurrentFile();
             }
-        }
-
-        private SolidBrush GetAreaColor(string color)
-        {
-            if (color != null)
+            if (dataGridView1.CurrentRow == null || dataGridView1.CurrentRow.Cells[0].Value == null ||
+                dataGridView1.CurrentRow.Cells[0].Value.ToString() == "") return;
+            var filename = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+            if (ListFile.Any(m => m.FileName.Equals(filename)))
             {
-                switch (color)
-                {
-                    case "red": return new SolidBrush(Color.Red);
-                    case "orange": return new SolidBrush(Color.Orange);
-                    case "yellow": return new SolidBrush(Color.Yellow);
-                    case "green": return new SolidBrush(Color.Green);
-                    case "blue": return new SolidBrush(Color.Blue);
-                    case "violet": return new SolidBrush(Color.Violet);
-                }
+                CurrentFileTemplate = ListFile.FirstOrDefault(m => m.FileName.Equals(filename));
+                UpdateInfoData();
             }
-            return new SolidBrush(Color.FromArgb(128, Color.Black));
+            ListImage = new List<Image>();
+            index = 0;
+            T.Stop();
+            //comboBox1.SelectedIndex = 0;
+            //var listImg = readFileTmp(filename);
+            if (CurrentFileTemplate != null && CurrentFileTemplate.ListImages.Count > 0)
+            {
+                comboBox1.SelectedIndex = comboBox1.FindStringExact(CurrentFileTemplate.Angle.ToString());
+                ListImage = RotateListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Angle);
+                ListImage = ReSizeListImage(ListImage, widthShow, heightShow);
+                firstImage = CurrentFileTemplate.ListImages[0];
+                bitmap = (Bitmap)(firstImage);
+                setup(true);
+            }
         }
 
         private void playAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -685,9 +687,137 @@ namespace ManageImage
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             angle = Convert.ToInt32(comboBox1.SelectedItem);
-            var listImage = createListAllImage();
             ListImage = new List<Image>();
-            ListImage.AddRange(listImage);
+            if (CurrentFileTemplate != null)
+            {
+                CurrentFileTemplate.Angle = angle;
+                ListImage = RotateListImage(CurrentFileTemplate.ListImages, angle);
+                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
+                    CurrentFileTemplate.Height);
+            }
+            //var listImage = createListAllImage();
+            //ListImage = new List<Image>();
+            //ListImage.AddRange(listImage);
+        }
+
+        public void SaveCurrentFile()
+        {
+            var fileTemplate = ListFile.FirstOrDefault(m => m.FileName.Equals(CurrentFileTemplate.FileName));
+            if (fileTemplate != null)
+            {
+                fileTemplate.X = x;
+                fileTemplate.Y = y;
+                fileTemplate.Width = width;
+                fileTemplate.Height = height;
+                fileTemplate.Angle = angle;
+                fileTemplate.ListImageReturn = ListImage;
+            }
+        }
+
+        public List<Image> RotateListImage(List<Image> listImage, int agl)
+        {
+            var lstImage = new List<Image>();
+            foreach (var image in listImage)
+            {
+                image.RotateFlip(GetRotateFlipType(angle));
+                lstImage.Add(image);
+            }
+            return lstImage;
+        }
+
+        public List<Image> ReSizeListImage(List<Image> listImage, int newWidth, int newHeight)
+        {
+            var lstImageNew = new List<Image>();
+            foreach (var image in listImage)
+            {
+                var destRect = new Rectangle(0, 0, newWidth, newHeight);
+                var destImage = new Bitmap(newWidth, newHeight);
+
+                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+                using (var graphics = Graphics.FromImage(destImage))
+                {
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                    using (var wrapMode = new ImageAttributes())
+                    {
+                        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel,
+                            wrapMode);
+                    }
+                }
+                lstImageNew.Add(destImage);
+            }
+            return lstImageNew;
+        }
+
+        public RotateFlipType GetRotateFlipType(int agl)
+        {
+            RotateFlipType rotateFlipType = RotateFlipType.RotateNoneFlipNone;
+            switch (agl)
+            {
+                case 0:
+                    rotateFlipType = (RotateFlipType.RotateNoneFlipNone);
+                    break;
+                case 90:
+                    rotateFlipType = (RotateFlipType.Rotate90FlipNone);
+                    break;
+                case 180:
+                    rotateFlipType = (RotateFlipType.Rotate180FlipNone);
+                    break;
+                case 270:
+                    rotateFlipType = (RotateFlipType.Rotate270FlipNone);
+                    break;
+            }
+            return rotateFlipType;
+        }
+
+        public void UpdateInfoData()
+        {
+            if (CurrentFileTemplate != null)
+            {
+                tbX.Text = CurrentFileTemplate.X.ToString();
+                tbY.Text = CurrentFileTemplate.Y.ToString();
+                tbWidth.Text = CurrentFileTemplate.Width.ToString();
+                tbWidth.Minimum = CurrentFileTemplate.Width;
+                tbHeight.Text = CurrentFileTemplate.Height.ToString();
+                tbHeight.Minimum = CurrentFileTemplate.Height;
+                comboBox1.SelectedIndex = comboBox1.FindStringExact(CurrentFileTemplate.Angle.ToString());
+            }
+        }
+
+        public List<Image> CaculateListImage(int timePlay)
+        {
+            var lstImage = new List<Image>();
+            if (ListImage != null && ListImage.Count > 0)
+            {
+                var countImge = timePlay * 1000 / interval;
+                for (int i = 0; i < countImge; i++)
+                {
+                    var idx = i % ListImage.Count;
+                    lstImage.Add(ListImage[idx]);
+                }
+            }
+            return lstImage;
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridView1.CurrentCell != null && CurrentFileTemplate != null)
+            {
+                if (dataGridView1.CurrentCell.Value == null || Convert.ToInt32(dataGridView1.CurrentCell.Value) <= 0)
+                {
+                    dataGridView1.CurrentCell.Value = 10;
+                }
+                else 
+                {
+                    CurrentFileTemplate.TimePlay = Convert.ToInt32(dataGridView1.CurrentCell.Value);
+                }
+            }
         }
     }
 }

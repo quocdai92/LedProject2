@@ -11,11 +11,13 @@ namespace LedProject
     {
         public string FileName { get; set; }
         public List<Image> ListImages { get; set; } 
+        public List<Image> ListImageReturn { get; set; } 
         public int TimePlay { get; set; }
 
         public FileTemplate()
         {
             ListImages = new List<Image>();
+            ListImageReturn = new List<Image>();
         }
 
         public int X { get; set; }

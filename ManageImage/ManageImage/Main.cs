@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -65,6 +66,8 @@ namespace ManageImage
         public static DataTable ListAreaTable;
         public static int Interval = 50;
         public static Frames Frames;
+        public static List<Frames> ListFrames;
+        public bool isPlayAsFrame;
         public static Timer T = new Timer()
         {
             Interval = Interval
@@ -306,6 +309,7 @@ namespace ManageImage
         {
             isPlay = false;
             T.Stop();
+            isPlayAsFrame = false;
             //isEditable = true;
             //enableEditionToolStripMenuItem.Enabled = false;
             //isDrawDisplayArea = true;
@@ -669,21 +673,29 @@ namespace ManageImage
             {
                 if (ii >= 0 && index < ListAreas[ii].ListImages.Count)
                 {
-                    for (int i = 0; i < ListAreas.Count; i++)
+                    if (isPlayAsFrame)
                     {
-                        if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
+                        Frames.ListGrid.AddRange(ListFrames[index].ListGrid);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < ListAreas.Count; i++)
                         {
-                            Frames.DisplayAreas.Add(ListAreas[i]);
-                            var img = ListAreas[i].ListImages[index];
-                            Bitmap bm = new Bitmap(img);
-                            foreach (var cell in ListAreas[i].ListGrid)
+                            if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
                             {
-                                var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
-                                cell.Color = color;
-                                Frames.ListGrid.Add(cell);
+                                //Frames.DisplayAreas.Add(ListAreas[i]);
+                                var img = ListAreas[i].ListImages[index];
+                                Bitmap bm = new Bitmap(img);
+                                foreach (var cell in ListAreas[i].ListGrid)
+                                {
+                                    var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
+                                    cell.Color = color;
+                                    Frames.ListGrid.Add(cell);
+                                }
                             }
                         }
                     }
+                    
                     index++;
                 }
                 else
@@ -799,6 +811,12 @@ namespace ManageImage
             panel1.Invalidate();
         }
 
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportData();
+            isPlayAsFrame = true;
+        }
+
         #region Public method
 
         public void ReSizePanel()
@@ -869,6 +887,54 @@ namespace ManageImage
                 displayArea.ListGrid.Clear();
             }
             panel1.Invalidate();
+        }
+
+        public void ExportData()
+        {
+            //int idx;
+            var lstFrames = new List<Frames>();
+            var maxFrame = ListAreas[0].ListImages.Count;
+            for (int idx = 0; idx < maxFrame; idx++)
+            {
+                var frame = new Frames()
+                {
+                    ListGrid = new List<Cell>()
+                };
+                foreach (DisplayArea area in ListAreas)
+                {
+                    if (area.AreaId > 0 && area.ListGrid.Count > 0 && area.ListImages.Count > 0)
+                    {
+                        var img = area.ListImages[idx];
+                        Bitmap bm = new Bitmap(img);
+                        foreach (var cell in area.ListGrid)
+                        {
+                            var color = bm.GetPixel(cell.X - area.X, cell.Y - area.Y);
+                            cell.Color = color;
+                            frame.ListGrid.Add(cell);
+                        }
+                    }
+                }
+                lstFrames.Add(frame);
+            }
+            ListFrames = new List<Frames>();
+            ListFrames.AddRange(lstFrames);
+            //save to file:
+            List<byte> fileToSave = new List<byte>();
+            foreach (var frame in ListFrames)
+            {
+                foreach (var cell in frame.ListGrid)
+                {
+                    var r = (byte)cell.Color.R;
+                    var g = (byte)cell.Color.G;
+                    var b = (byte)cell.Color.B;
+                    fileToSave.Add(r);
+                    fileToSave.Add(g);
+                    fileToSave.Add(b);
+                }
+            }
+            var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
+            fileToSave.AddRange(numberLed);
+            //File.WriteAllBytes(@"D:\Dai\Template\file.mgc",fileToSave.ToArray());
         }
         #endregion
     }

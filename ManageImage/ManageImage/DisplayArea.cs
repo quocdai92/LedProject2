@@ -40,6 +40,6 @@ namespace ManageImage
         public int X { get; set; }
         //pixel location y
         public int Y { get; set; }
-
+        public bool IsEmpty { get; set; }
     }
 }

@@ -66,6 +66,13 @@
     <Compile Include="frmMAP.designer.cs">
       <DependentUpon>frmMAP.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmProgressbar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmProgressbar.Designer.cs">
+      <DependentUpon>frmProgressbar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LockBitmap.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,6 +87,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMAP.resx">
       <DependentUpon>frmMAP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmProgressbar.resx">
+      <DependentUpon>frmProgressbar.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

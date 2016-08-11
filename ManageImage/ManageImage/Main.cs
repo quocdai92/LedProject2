@@ -66,7 +66,8 @@ namespace ManageImage
         public static DataTable ListAreaTable;
         public static int Interval = 50;
         public static Frames Frames;
-        public static List<Frames> ListFrames;
+        public List<Frames> ListFrames;
+        public List<byte> FileToSave = new List<byte>();
         public bool isPlayAsFrame;
         public static Timer T = new Timer()
         {
@@ -368,8 +369,26 @@ namespace ManageImage
             {
                 isDragging = false;
                 isDrawDisplayArea = false;
+                //add new area black:
+                DisplayArea newArea = new DisplayArea();
+                foreach (var gridMap in gridMaps)
+                {
+                    if (!ListAreas.Any(m => m.ListGrid.Contains(gridMap)))
+                    {
+                        var grid = new Cell()
+                        {
+                            IsEmpty = true,
+                            Color = Color.Black,
+                            X = gridMap.X,
+                            Y = gridMap.Y
+                        };
+                        newArea.ListGrid.Add(grid);
+                    }
+                }
                 //calculate time play:
                 var time = ListAreas.Max(m => m.TimePlay);
+
+                ListAreas.Add(newArea);
                 foreach (var area in ListAreas)
                 {
                     area.TimePlay = time;
@@ -675,7 +694,36 @@ namespace ManageImage
                 {
                     if (isPlayAsFrame)
                     {
-                        Frames.ListGrid.AddRange(ListFrames[index].ListGrid);
+                        foreach (var gridMap in gridMaps)
+                        {
+                            if (ListAreas.Any(m => m.ListGrid.Contains(gridMap)))
+                            {
+                                var area = ListAreas.FirstOrDefault(m => m.ListGrid.Contains(gridMap));
+                                var img = area.ListImages[index];
+                                Bitmap bm = new Bitmap(img);
+                                var color = bm.GetPixel(gridMap.X - area.X, gridMap.Y - area.Y);
+                                gridMap.Color = color;
+                                //var r = (byte)gridMap.Color.R;
+                                //var g = (byte)gridMap.Color.G;
+                                //var b = (byte)gridMap.Color.B;
+                                //FileToSave.Add(r);
+                                //FileToSave.Add(g);
+                                //FileToSave.Add(b);
+                                Frames.ListGrid.Add(gridMap);
+
+                            }
+                            else
+                            {
+                                gridMap.Color = Color.Black;
+                                //var r = (byte)gridMap.Color.R;
+                                //var g = (byte)gridMap.Color.G;
+                                //var b = (byte)gridMap.Color.B;
+                                //FileToSave.Add(r);
+                                //FileToSave.Add(g);
+                                //FileToSave.Add(b);
+                                Frames.ListGrid.Add(gridMap);
+                            }
+                        }
                     }
                     else
                     {
@@ -695,12 +743,13 @@ namespace ManageImage
                             }
                         }
                     }
-                    
+
                     index++;
                 }
                 else
                 {
                     index = 0;
+                    T.Stop();
                 }
             }
             this.panel1.Focus();
@@ -817,6 +866,28 @@ namespace ManageImage
             isPlayAsFrame = true;
         }
 
+        private void saveFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
+            var listByte = new List<byte>();
+            listByte.AddRange(numberLed);
+            listByte.AddRange(FileToSave);
+            var dataArray = listByte.ToArray();
+            using (FileStream
+           fileStream = new FileStream(@"D:\Dai\Template\ddd.dcm", FileMode.Create))
+            {
+                // Write the data to the file, byte by byte.
+                for (int i = 0; i < dataArray.Length; i++)
+                {
+                    fileStream.WriteByte(dataArray[i]);
+                }
+
+            }
+            //FileToSave.AddRange(numberLed);
+            // File.WriteAllBytes(@"D:\Dai\Template\file.dcm", listByte.ToArray());
+            MessageBox.Show(@"Save Successful");
+        }
+
         #region Public method
 
         public void ReSizePanel()
@@ -892,50 +963,129 @@ namespace ManageImage
         public void ExportData()
         {
             //int idx;
-            var lstFrames = new List<Frames>();
+            FileToSave = new List<byte>();
+            ListFrames = new List<Frames>();
             var maxFrame = ListAreas[0].ListImages.Count;
+            FrmProgressbar progressbar = new FrmProgressbar();
+            progressbar.progressBar1.Maximum = maxFrame;
+            progressbar.progressBar1.Minimum = 0;
+            progressbar.progressBar1.Step = 1;
+            progressbar.Show();
             for (int idx = 0; idx < maxFrame; idx++)
             {
+                //foreach (var gridMap in gridMaps)
+                //{
+                //    var area = ListAreas.FirstOrDefault(m => m.ListGrid.Contains(gridMap));
+                //    if (area != null)
+                //    {
+                //        Bitmap bm = new Bitmap(area.ListImages[idx]);
+
+                //        Bitmap bmp = new Bitmap(area.ListImages[idx]);
+                //        LockBitmap lockBitmap = new LockBitmap(bmp);
+                //        lockBitmap.LockBits();
+                //        var color = lockBitmap.GetPixel(gridMap.X - area.X, gridMap.Y - area.Y);
+                //        //gridMap.Color = color;
+                //        FileToSave.Add(color.R);
+                //        FileToSave.Add(color.G);
+                //        FileToSave.Add(color.B);
+                //        lockBitmap.UnlockBits();
+                //    }
+                //    else
+                //    {
+                //        FileToSave.Add(0);
+                //        FileToSave.Add(0);
+                //        FileToSave.Add(0);
+                //    }
+                //}
                 var frame = new Frames()
                 {
                     ListGrid = new List<Cell>()
                 };
-                foreach (DisplayArea area in ListAreas)
+                for (int i = 0; i < ListAreas.Count; i++)
                 {
-                    if (area.AreaId > 0 && area.ListGrid.Count > 0 && area.ListImages.Count > 0)
+                    var img = ListAreas[i].ListImages.Count > 0? ListAreas[i].ListImages[idx]:null;
+                    Bitmap bm = img != null?new Bitmap(img):null;
+                    //Frames.DisplayAreas.Add(ListAreas[i]);
+                    foreach (var cell in ListAreas[i].ListGrid)
                     {
-                        var img = area.ListImages[idx];
-                        Bitmap bm = new Bitmap(img);
-                        foreach (var cell in area.ListGrid)
+                        if (cell.IsEmpty || bm == null)
                         {
-                            var color = bm.GetPixel(cell.X - area.X, cell.Y - area.Y);
-                            cell.Color = color;
-                            frame.ListGrid.Add(cell);
+                            var grid = new Cell
+                            {
+                                Color = cell.Color,
+                                X = cell.X,
+                                Y = cell.Y
+                            };
+                            //cell.Color = color;
+                            frame.ListGrid.Add(grid);
+                        }
+                        else
+                        {
+                            var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
+                            var grid = new Cell
+                            {
+                                Color = color,
+                                X = cell.X,
+                                Y = cell.Y
+                            };
+                            //cell.Color = color;
+                            frame.ListGrid.Add(grid);
                         }
                     }
                 }
-                lstFrames.Add(frame);
+                List<Cell> newList = frame.ListGrid.OrderBy(c => c.Y).ThenBy(n => n.X).ToList();
+                ListFrames.Add(new Frames()
+                {
+                    ListGrid =  newList
+                });
+                progressbar.progressBar1.PerformStep();
             }
-            ListFrames = new List<Frames>();
-            ListFrames.AddRange(lstFrames);
-            //save to file:
-            List<byte> fileToSave = new List<byte>();
+            var numberLed = BitConverter.GetBytes(gridMaps.Count);
+            var listByte = new List<byte>();
+            listByte.AddRange(numberLed);
             foreach (var frame in ListFrames)
             {
                 foreach (var cell in frame.ListGrid)
                 {
-                    var r = (byte)cell.Color.R;
-                    var g = (byte)cell.Color.G;
-                    var b = (byte)cell.Color.B;
-                    fileToSave.Add(r);
-                    fileToSave.Add(g);
-                    fileToSave.Add(b);
+                    FileToSave.Add(cell.Color.R);
+                    FileToSave.Add(cell.Color.G);
+                    FileToSave.Add(cell.Color.B);
                 }
             }
-            var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
-            fileToSave.AddRange(numberLed);
+            listByte.AddRange(FileToSave);
+            var dataArray = listByte.ToArray();
+            using (FileStream
+            fileStream = new FileStream(@"D:\Dai\Template\ddd.dcm", FileMode.Create))
+            {
+                // Write the data to the file, byte by byte.
+                for (int i = 0; i < dataArray.Length; i++)
+                {
+                    fileStream.WriteByte(dataArray[i]);
+                }
+
+            }
+            MessageBox.Show(@"Export file success.");
+            progressbar.Close();
+
+            //save to file:
+            //List<byte> fileToSave = new List<byte>();
+            //foreach (var frame in ListFrames)
+            //{
+            //    foreach (var cell in frame.ListGrid)
+            //    {
+            //        var r = (byte)cell.Color.R;
+            //        var g = (byte)cell.Color.G;
+            //        var b = (byte)cell.Color.B;
+            //        fileToSave.Add(r);
+            //        fileToSave.Add(g);
+            //        fileToSave.Add(b);
+            //    }
+            //}
+            //var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
+            //fileToSave.AddRange(numberLed);
             //File.WriteAllBytes(@"D:\Dai\Template\file.mgc",fileToSave.ToArray());
         }
+
         #endregion
     }
 }

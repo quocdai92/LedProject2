@@ -238,7 +238,8 @@ namespace ManageImage
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Multiselect = true;
-            ListFile = new List<FileTemplate>();
+            if(ListFile == null)
+                ListFile = new List<FileTemplate>();
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 foreach (var fileName in openFileDialog1.FileNames)
@@ -495,90 +496,133 @@ namespace ManageImage
 
         private void tbX_TextChanged(object sender, EventArgs e)
         {
-            x = Convert.ToInt32(tbX.Text);
-            ListImage = new List<Image>();
-            if (CurrentFileTemplate != null)
+            int tempX = Convert.ToInt32(tbX.Text);
+
+            if (tempX < width)
             {
-                CurrentFileTemplate.X = x;
-                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
-                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
-                    heightShow - CurrentFileTemplate.Y);
-                foreach (var image in lstResizeImage)
+                x = tempX;
+                ListImage = new List<Image>();
+                if (CurrentFileTemplate != null)
                 {
-                    ListImage.Add(cropImage(image, rectCrop));
+                    CurrentFileTemplate.X = x;
+                    var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
+                    var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                        heightShow - CurrentFileTemplate.Y);
+                    foreach (var image in lstResizeImage)
+                    {
+                        ListImage.Add(cropImage(image, rectCrop));
+                    }
+                    ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
                 }
-                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
+
             }
+            else
+            {
+                MessageBox.Show(@"X must be less than Width!", @"Error");
+                tbX.Text = x.ToString();
+            }
+
         }
 
         private void tbY_TextChanged(object sender, EventArgs e)
         {
-            y = Convert.ToInt32(tbY.Text);
-            ListImage = new List<Image>();
-            if (CurrentFileTemplate != null)
+            int tempY = Convert.ToInt32(tbY.Text);
+            if (tempY < height)
             {
-                CurrentFileTemplate.Y = y;
-                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
-                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
-                    heightShow - CurrentFileTemplate.Y);
-                foreach (var image in lstResizeImage)
+                y = tempY;
+                ListImage = new List<Image>();
+                if (CurrentFileTemplate != null)
                 {
-                    ListImage.Add(cropImage(image, rectCrop));
+                    CurrentFileTemplate.Y = y;
+                    var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
+                    var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                        heightShow - CurrentFileTemplate.Y);
+                    foreach (var image in lstResizeImage)
+                    {
+                        ListImage.Add(cropImage(image, rectCrop));
+                    }
+                    ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
                 }
-                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
             }
+            else
+            {
+                MessageBox.Show(@"Y must be less than Height!", @"Error");
+                tbY.Text = y.ToString();
+            }
+
+
         }
 
         private void tbWidth_TextChanged(object sender, EventArgs e)
         {
-            width = Convert.ToInt32(tbWidth.Text);
-            if (width < tbWidth.Minimum)
+            int tempW = Convert.ToInt32(tbWidth.Text);
+
+            if (tempW >= x)
             {
-                width = Convert.ToInt32(tbWidth.Minimum);
-            }
-            ListImage = new List<Image>();
-            if (CurrentFileTemplate != null)
-            {
-                CurrentFileTemplate.Width = width;
-                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
-                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow,
-                    heightShow);
-                foreach (var image in lstResizeImage)
+                width = tempW;
+                if (width < tbWidth.Minimum)
                 {
-                    ListImage.Add(cropImage(image, rectCrop));
+                    width = Convert.ToInt32(tbWidth.Minimum);
                 }
-                //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                //    CurrentFileTemplate.Height));
+                ListImage = new List<Image>();
+                if (CurrentFileTemplate != null)
+                {
+                    CurrentFileTemplate.Width = width;
+                    var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
+                    var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                       heightShow - CurrentFileTemplate.Y);
+                    foreach (var image in lstResizeImage)
+                    {
+                        ListImage.Add(cropImage(image, rectCrop));
+                    }
+                    //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    //    CurrentFileTemplate.Height));
+                }
+            }
+            else
+            {
+                MessageBox.Show(@"Width must be greater or equal than X!", @"Error");
+                tbWidth.Text = width.ToString();
             }
         }
 
         private void tbHeight_TextChanged(object sender, EventArgs e)
         {
-            height = Convert.ToInt32(tbHeight.Text);
-            if (height < tbHeight.Minimum)
+            int tempH = Convert.ToInt32(tbHeight.Text);
+            if (tempH >= y)
             {
-                height = Convert.ToInt32(tbHeight.Minimum);
-            }
-            ListImage = new List<Image>();
-            if (CurrentFileTemplate != null)
-            {
-                CurrentFileTemplate.Height = height;
-                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
-                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow,
-                    heightShow);
-                foreach (var image in lstResizeImage)
+                height = tempH;
+                if (height < tbHeight.Minimum)
                 {
-                    ListImage.Add(cropImage(image, rectCrop));
+                    height = Convert.ToInt32(tbHeight.Minimum);
                 }
-                //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
-                //    CurrentFileTemplate.Height));
+                ListImage = new List<Image>();
+                if (CurrentFileTemplate != null)
+                {
+                    CurrentFileTemplate.Height = height;
+                    var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
+                    var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                        heightShow - CurrentFileTemplate.Y);
+                    foreach (var image in lstResizeImage)
+                    {
+                        ListImage.Add(cropImage(image, rectCrop));
+                    }
+                    //ListImage.AddRange(ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                    //    CurrentFileTemplate.Height));
+                }
             }
+            else
+            {
+                MessageBox.Show(@"Height must be greater or equal than Y!", @"Error");
+                tbHeight.Text = height.ToString();
+            }
+
         }
 
         private void btOpenFile_Click(object sender, EventArgs e)
@@ -807,13 +851,13 @@ namespace ManageImage
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1.CurrentCell != null && CurrentFileTemplate != null)
+            if (dataGridView1.CurrentCell != null && CurrentFileTemplate != null && dataGridView1.CurrentCell.ColumnIndex == 1)
             {
                 if (dataGridView1.CurrentCell.Value == null || Convert.ToInt32(dataGridView1.CurrentCell.Value) <= 0)
                 {
                     dataGridView1.CurrentCell.Value = 10;
                 }
-                else 
+                else
                 {
                     CurrentFileTemplate.TimePlay = Convert.ToInt32(dataGridView1.CurrentCell.Value);
                 }

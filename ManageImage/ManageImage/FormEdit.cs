@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -67,8 +68,8 @@ namespace ManageImage
             heightShow = area.Height;
             panel1.Width = widthShow * cellSize;
             panel1.Height = heightShow * cellSize;
-            dataGridView1.Columns.Add("FileName", "FileName");
-            dataGridView1.Columns.Add("TimePlay", "TimePlay");
+            dataGridView1.Columns.Add("FileName", ConfigurationManager.AppSettings["FileName"]??"FileName");
+            dataGridView1.Columns.Add("TimePlay", "T(s)");
             dataGridView1.Columns[0].Width = dataGridView1.Width * 2 / 3;
             dataGridView1.Columns[1].Width = dataGridView1.Width / 3;
             dataGridView1.ReadOnly = false;
@@ -656,6 +657,7 @@ namespace ManageImage
             Main.CurrentArea.TimePlay = timePlay;
             //Main.CurrentArea.Angle = angle;
             MessageBox.Show(@"Save successfully!", @"Save");
+            T.Stop();
             //this.Dispose();
             this.Close();
         }
@@ -709,10 +711,13 @@ namespace ManageImage
                 comboBox1.SelectedIndex = comboBox1.FindStringExact(CurrentFileTemplate.Angle.ToString());
                 ListImage = RotateListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Angle);
                 ListImage = ReSizeListImage(ListImage, widthShow, heightShow);
+                CurrentFileTemplate.ListImages = ListImage;
                 firstImage = CurrentFileTemplate.ListImages[0];
                 bitmap = (Bitmap)(firstImage);
                 setup(true);
             }
+            //PlayRow();
+            btnPlay.PerformClick();
         }
 
         private void playAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -862,6 +867,39 @@ namespace ManageImage
                     CurrentFileTemplate.TimePlay = Convert.ToInt32(dataGridView1.CurrentCell.Value);
                 }
             }
+        }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            if (ListImage != null && ListImage.Count > 0)
+            {
+                //ListImage = new List<Image>(CurrentFileTemplate.ListImages);
+                isStart = true;
+                T.Start();
+                ListImage = CaculateListImage(CurrentFileTemplate.TimePlay);
+            }
+        }
+
+        private void PlayRow()
+        {
+            if (ListImage != null && ListImage.Count > 0)
+            {
+                //ListImage = new List<Image>(CurrentFileTemplate.ListImages);
+                isStart = true;
+                T.Start();
+                ListImage = CaculateListImage(CurrentFileTemplate.TimePlay);
+            }
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            isStart = false;
+            T.Stop();
+            index = 0;
+            //ListImage.Clear();
+            bitmap = (Bitmap)firstImage;
+            isStart = false;
+            setup(true);
         }
     }
 }

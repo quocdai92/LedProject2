@@ -12,9 +12,16 @@ namespace ManageImage
 {
     public partial class FrmProgressbar : Form
     {
+        public bool IsCancel;
         public FrmProgressbar()
         {
             InitializeComponent();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            IsCancel = true;
+            this.Close();
         }
     }
 }

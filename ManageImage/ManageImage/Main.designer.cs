@@ -33,13 +33,10 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableEditionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnNewArea = new System.Windows.Forms.Button();
-            this.btnSave = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cbkAutoScroll = new System.Windows.Forms.CheckBox();
             this.lblMapTotalLedValue = new System.Windows.Forms.Label();
@@ -50,18 +47,28 @@
             this.lblMapWidth = new System.Windows.Forms.Label();
             this.trkbGridSize = new System.Windows.Forms.TrackBar();
             this.label1 = new System.Windows.Forms.Label();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnMap = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.btnPlay = new System.Windows.Forms.Button();
-            this.btnExport = new System.Windows.Forms.Button();
-            this.btnEnableEdit = new System.Windows.Forms.Button();
-            this.btnStop = new System.Windows.Forms.Button();
+            this.ptbEnableEdit = new System.Windows.Forms.PictureBox();
+            this.ptbExport = new System.Windows.Forms.PictureBox();
+            this.ptbPause = new System.Windows.Forms.PictureBox();
+            this.ptbPlay = new System.Windows.Forms.PictureBox();
+            this.ptbMap = new System.Windows.Forms.PictureBox();
+            this.ptbDelete = new System.Windows.Forms.PictureBox();
+            this.ptbSave = new System.Windows.Forms.PictureBox();
+            this.ptbAddNew = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvListArea)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trkbGridSize)).BeginInit();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbEnableEdit)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbExport)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbPause)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbPlay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbMap)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbDelete)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbSave)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbAddNew)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -102,8 +109,7 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exportToolStripMenuItem,
-            this.saveFileToolStripMenuItem});
+            this.exportToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -111,17 +117,9 @@
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
-            // 
-            // saveFileToolStripMenuItem
-            // 
-            this.saveFileToolStripMenuItem.Name = "saveFileToolStripMenuItem";
-            this.saveFileToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
-            this.saveFileToolStripMenuItem.Text = "SaveFile";
-            this.saveFileToolStripMenuItem.Visible = false;
-            this.saveFileToolStripMenuItem.Click += new System.EventHandler(this.saveFileToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -146,7 +144,7 @@
             // 
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
             this.startToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.startToolStripMenuItem_Click);
             // 
@@ -154,29 +152,9 @@
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
             this.stopToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(202, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
-            // 
-            // btnNewArea
-            // 
-            this.btnNewArea.Location = new System.Drawing.Point(12, 46);
-            this.btnNewArea.Name = "btnNewArea";
-            this.btnNewArea.Size = new System.Drawing.Size(39, 23);
-            this.btnNewArea.TabIndex = 3;
-            this.btnNewArea.Text = "New";
-            this.btnNewArea.UseVisualStyleBackColor = true;
-            this.btnNewArea.Click += new System.EventHandler(this.btnNewArea_Click);
-            // 
-            // btnSave
-            // 
-            this.btnSave.Location = new System.Drawing.Point(110, 46);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(47, 23);
-            this.btnSave.TabIndex = 5;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // groupBox1
             // 
@@ -189,6 +167,7 @@
             this.groupBox1.Controls.Add(this.lblMapWidth);
             this.groupBox1.Controls.Add(this.trkbGridSize);
             this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(13, 393);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(282, 165);
@@ -201,7 +180,7 @@
             this.cbkAutoScroll.AutoSize = true;
             this.cbkAutoScroll.Location = new System.Drawing.Point(147, 134);
             this.cbkAutoScroll.Name = "cbkAutoScroll";
-            this.cbkAutoScroll.Size = new System.Drawing.Size(96, 17);
+            this.cbkAutoScroll.Size = new System.Drawing.Size(105, 19);
             this.cbkAutoScroll.TabIndex = 10;
             this.cbkAutoScroll.Text = "Tự Động Cuộn";
             this.cbkAutoScroll.UseVisualStyleBackColor = true;
@@ -218,10 +197,10 @@
             // lblMapTotalLed
             // 
             this.lblMapTotalLed.AutoSize = true;
-            this.lblMapTotalLed.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMapTotalLed.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMapTotalLed.Location = new System.Drawing.Point(144, 90);
             this.lblMapTotalLed.Name = "lblMapTotalLed";
-            this.lblMapTotalLed.Size = new System.Drawing.Size(94, 17);
+            this.lblMapTotalLed.Size = new System.Drawing.Size(80, 15);
             this.lblMapTotalLed.TabIndex = 7;
             this.lblMapTotalLed.Text = "Tổng Số Led:";
             // 
@@ -237,10 +216,10 @@
             // lblMapHeight
             // 
             this.lblMapHeight.AutoSize = true;
-            this.lblMapHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMapHeight.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMapHeight.Location = new System.Drawing.Point(6, 133);
             this.lblMapHeight.Name = "lblMapHeight";
-            this.lblMapHeight.Size = new System.Drawing.Size(37, 17);
+            this.lblMapHeight.Size = new System.Drawing.Size(32, 15);
             this.lblMapHeight.TabIndex = 5;
             this.lblMapHeight.Text = "Cao:";
             // 
@@ -256,10 +235,10 @@
             // lblMapWidth
             // 
             this.lblMapWidth.AutoSize = true;
-            this.lblMapWidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMapWidth.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMapWidth.Location = new System.Drawing.Point(6, 90);
             this.lblMapWidth.Name = "lblMapWidth";
-            this.lblMapWidth.Size = new System.Drawing.Size(46, 17);
+            this.lblMapWidth.Size = new System.Drawing.Size(40, 15);
             this.lblMapWidth.TabIndex = 3;
             this.lblMapWidth.Text = "Rộng:";
             // 
@@ -282,29 +261,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(6, 26);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(88, 13);
+            this.label1.Size = new System.Drawing.Size(95, 15);
             this.label1.TabIndex = 0;
             this.label1.Text = "Kích Thước Led:";
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.Location = new System.Drawing.Point(163, 46);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(47, 23);
-            this.btnDelete.TabIndex = 7;
-            this.btnDelete.Text = "Delete";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
-            // btnMap
-            // 
-            this.btnMap.Location = new System.Drawing.Point(57, 46);
-            this.btnMap.Name = "btnMap";
-            this.btnMap.Size = new System.Drawing.Size(47, 23);
-            this.btnMap.TabIndex = 8;
-            this.btnMap.Text = "MAP";
-            this.btnMap.UseVisualStyleBackColor = true;
-            this.btnMap.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // panel2
             // 
@@ -320,61 +279,127 @@
             this.panel2.TabIndex = 9;
             this.panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.panel2_Scroll);
             // 
-            // btnPlay
+            // ptbEnableEdit
             // 
-            this.btnPlay.Location = new System.Drawing.Point(12, 88);
-            this.btnPlay.Name = "btnPlay";
-            this.btnPlay.Size = new System.Drawing.Size(39, 23);
-            this.btnPlay.TabIndex = 3;
-            this.btnPlay.Text = "Play";
-            this.btnPlay.UseVisualStyleBackColor = true;
-            this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
+            this.ptbEnableEdit.BackgroundImage = global::ManageImage.Properties.Resources.Pixel_editor;
+            this.ptbEnableEdit.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbEnableEdit.Enabled = false;
+            this.ptbEnableEdit.Location = new System.Drawing.Point(125, 88);
+            this.ptbEnableEdit.Name = "ptbEnableEdit";
+            this.ptbEnableEdit.Size = new System.Drawing.Size(32, 32);
+            this.ptbEnableEdit.TabIndex = 17;
+            this.ptbEnableEdit.TabStop = false;
+            this.ptbEnableEdit.Click += new System.EventHandler(this.btnEnableEdit_Click);
+            this.ptbEnableEdit.MouseEnter += new System.EventHandler(this.ptbEnableEdit_MouseEnter);
+            this.ptbEnableEdit.MouseLeave += new System.EventHandler(this.ptbEnableEdit_MouseLeave);
             // 
-            // btnExport
+            // ptbExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(110, 88);
-            this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(47, 23);
-            this.btnExport.TabIndex = 5;
-            this.btnExport.Text = "Export";
-            this.btnExport.UseVisualStyleBackColor = true;
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.ptbExport.BackgroundImage = global::ManageImage.Properties.Resources.export_11;
+            this.ptbExport.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbExport.Location = new System.Drawing.Point(179, 37);
+            this.ptbExport.Name = "ptbExport";
+            this.ptbExport.Size = new System.Drawing.Size(32, 32);
+            this.ptbExport.TabIndex = 16;
+            this.ptbExport.TabStop = false;
+            this.ptbExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.ptbExport.MouseEnter += new System.EventHandler(this.ptbExport_MouseEnter);
+            this.ptbExport.MouseLeave += new System.EventHandler(this.ptbExport_MouseLeave);
             // 
-            // btnEnableEdit
+            // ptbPause
             // 
-            this.btnEnableEdit.Location = new System.Drawing.Point(163, 88);
-            this.btnEnableEdit.Name = "btnEnableEdit";
-            this.btnEnableEdit.Size = new System.Drawing.Size(93, 23);
-            this.btnEnableEdit.TabIndex = 7;
-            this.btnEnableEdit.Text = "Enable Edition";
-            this.btnEnableEdit.UseVisualStyleBackColor = true;
-            this.btnEnableEdit.Click += new System.EventHandler(this.btnEnableEdit_Click);
+            this.ptbPause.BackgroundImage = global::ManageImage.Properties.Resources.Pause;
+            this.ptbPause.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbPause.Location = new System.Drawing.Point(69, 88);
+            this.ptbPause.Name = "ptbPause";
+            this.ptbPause.Size = new System.Drawing.Size(32, 32);
+            this.ptbPause.TabIndex = 15;
+            this.ptbPause.TabStop = false;
+            this.ptbPause.Click += new System.EventHandler(this.btnStop_Click);
+            this.ptbPause.MouseEnter += new System.EventHandler(this.ptbPause_MouseEnter);
+            this.ptbPause.MouseLeave += new System.EventHandler(this.ptbPause_MouseLeave);
             // 
-            // btnStop
+            // ptbPlay
             // 
-            this.btnStop.Location = new System.Drawing.Point(57, 88);
-            this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(47, 23);
-            this.btnStop.TabIndex = 8;
-            this.btnStop.Text = "Stop";
-            this.btnStop.UseVisualStyleBackColor = true;
-            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            this.ptbPlay.BackgroundImage = global::ManageImage.Properties.Resources.Play;
+            this.ptbPlay.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbPlay.Location = new System.Drawing.Point(13, 88);
+            this.ptbPlay.Name = "ptbPlay";
+            this.ptbPlay.Size = new System.Drawing.Size(32, 32);
+            this.ptbPlay.TabIndex = 14;
+            this.ptbPlay.TabStop = false;
+            this.ptbPlay.Click += new System.EventHandler(this.btnPlay_Click);
+            this.ptbPlay.MouseEnter += new System.EventHandler(this.ptbPlay_MouseEnter);
+            this.ptbPlay.MouseLeave += new System.EventHandler(this.ptbPlay_MouseLeave);
+            // 
+            // ptbMap
+            // 
+            this.ptbMap.BackgroundImage = global::ManageImage.Properties.Resources.Pixels;
+            this.ptbMap.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbMap.Location = new System.Drawing.Point(13, 37);
+            this.ptbMap.Name = "ptbMap";
+            this.ptbMap.Size = new System.Drawing.Size(32, 32);
+            this.ptbMap.TabIndex = 13;
+            this.ptbMap.TabStop = false;
+            this.ptbMap.Click += new System.EventHandler(this.btnEdit_Click);
+            this.ptbMap.MouseEnter += new System.EventHandler(this.ptbMap_MouseEnter);
+            this.ptbMap.MouseLeave += new System.EventHandler(this.ptbMap_MouseLeave);
+            // 
+            // ptbDelete
+            // 
+            this.ptbDelete.BackColor = System.Drawing.SystemColors.Control;
+            this.ptbDelete.BackgroundImage = global::ManageImage.Properties.Resources.Remove;
+            this.ptbDelete.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbDelete.Location = new System.Drawing.Point(233, 37);
+            this.ptbDelete.Name = "ptbDelete";
+            this.ptbDelete.Size = new System.Drawing.Size(32, 32);
+            this.ptbDelete.TabIndex = 12;
+            this.ptbDelete.TabStop = false;
+            this.ptbDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            this.ptbDelete.MouseEnter += new System.EventHandler(this.ptbDelete_MouseEnter);
+            this.ptbDelete.MouseLeave += new System.EventHandler(this.ptbDelete_MouseLeave);
+            // 
+            // ptbSave
+            // 
+            this.ptbSave.BackgroundImage = global::ManageImage.Properties.Resources.Save;
+            this.ptbSave.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbSave.Location = new System.Drawing.Point(125, 37);
+            this.ptbSave.Name = "ptbSave";
+            this.ptbSave.Size = new System.Drawing.Size(32, 32);
+            this.ptbSave.TabIndex = 11;
+            this.ptbSave.TabStop = false;
+            this.ptbSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.ptbSave.MouseEnter += new System.EventHandler(this.ptbSave_MouseEnter);
+            this.ptbSave.MouseLeave += new System.EventHandler(this.ptbSave_MouseLeave);
+            // 
+            // ptbAddNew
+            // 
+            this.ptbAddNew.BackgroundImage = global::ManageImage.Properties.Resources.Add;
+            this.ptbAddNew.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ptbAddNew.Location = new System.Drawing.Point(69, 37);
+            this.ptbAddNew.Name = "ptbAddNew";
+            this.ptbAddNew.Size = new System.Drawing.Size(32, 32);
+            this.ptbAddNew.TabIndex = 10;
+            this.ptbAddNew.TabStop = false;
+            this.ptbAddNew.Click += new System.EventHandler(this.btnNewArea_Click);
+            this.ptbAddNew.MouseEnter += new System.EventHandler(this.ptbAddNew_MouseEnter);
+            this.ptbAddNew.MouseLeave += new System.EventHandler(this.ptbAddNew_MouseLeave);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(988, 570);
+            this.Controls.Add(this.ptbEnableEdit);
+            this.Controls.Add(this.ptbExport);
+            this.Controls.Add(this.ptbPause);
+            this.Controls.Add(this.ptbPlay);
+            this.Controls.Add(this.ptbMap);
+            this.Controls.Add(this.ptbDelete);
+            this.Controls.Add(this.ptbSave);
+            this.Controls.Add(this.ptbAddNew);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.btnStop);
-            this.Controls.Add(this.btnMap);
-            this.Controls.Add(this.btnEnableEdit);
-            this.Controls.Add(this.btnDelete);
-            this.Controls.Add(this.btnExport);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.btnPlay);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.btnNewArea);
             this.Controls.Add(this.dgvListArea);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -391,6 +416,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.trkbGridSize)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbEnableEdit)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbExport)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbPause)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbPlay)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbMap)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbDelete)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbSave)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbAddNew)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -404,28 +437,27 @@
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopToolStripMenuItem;
-        private System.Windows.Forms.Button btnNewArea;
-        private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TrackBar trkbGridSize;
-        private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.ToolStripMenuItem enableEditionToolStripMenuItem;
-        private System.Windows.Forms.Button btnMap;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.CheckBox cbkAutoScroll;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveFileToolStripMenuItem;
         private System.Windows.Forms.Label lblMapWidth;
         private System.Windows.Forms.Label lblMapWidthValue;
         private System.Windows.Forms.Label lblMapHeightValue;
         private System.Windows.Forms.Label lblMapHeight;
         private System.Windows.Forms.Label lblMapTotalLedValue;
         private System.Windows.Forms.Label lblMapTotalLed;
-        private System.Windows.Forms.Button btnPlay;
-        private System.Windows.Forms.Button btnExport;
-        private System.Windows.Forms.Button btnEnableEdit;
-        private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.PictureBox ptbAddNew;
+        private System.Windows.Forms.PictureBox ptbSave;
+        private System.Windows.Forms.PictureBox ptbDelete;
+        private System.Windows.Forms.PictureBox ptbMap;
+        private System.Windows.Forms.PictureBox ptbPlay;
+        private System.Windows.Forms.PictureBox ptbPause;
+        private System.Windows.Forms.PictureBox ptbExport;
+        private System.Windows.Forms.PictureBox ptbEnableEdit;
     }
 }

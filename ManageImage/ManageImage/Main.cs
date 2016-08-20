@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -28,13 +29,15 @@ namespace ManageImage
             panel1.Width = CellSize * width;
             //ResetGridPanel(CellSize);
             panel1.Invalidate();
-            dgvListArea.Columns.Add("Name", "Name");
-            dgvListArea.Columns.Add("Width", "Width");
-            dgvListArea.Columns.Add("Height", "Height");
-            dgvListArea.Columns[1].Width = 80;
-            dgvListArea.Columns[2].Width = 80;
+            dgvListArea.Columns.Add("Name", ConfigurationManager.AppSettings["Name"] ?? "Name");
+            dgvListArea.Columns.Add("Width", ConfigurationManager.AppSettings["Width"] ?? "Width");
+            dgvListArea.Columns.Add("Height", ConfigurationManager.AppSettings["Height"] ?? "Height");
+            dgvListArea.Columns[1].Width = 35;
+            dgvListArea.Columns[2].Width = 35;
+            dgvListArea.Columns[0].Width = 180;
             dgvListArea.MultiSelect = false;
             dgvListArea.Rows[0].Selected = true;
+            dgvListArea.ReadOnly = true;
             if (myBuffer != null)
                 myBuffer.Dispose();
             myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
@@ -58,7 +61,13 @@ namespace ManageImage
         private int index;
         private string[] listColor =
         {
-            "red","orange","yellow","green","blue","violet", "black"
+            "red",
+            "green",
+            "blue",
+            "orange",
+            "cyan",
+            "violet",
+            "black"
         };
 
         public static List<DisplayArea> ListAreas = new List<DisplayArea>();
@@ -68,7 +77,7 @@ namespace ManageImage
         public static Frames Frames;
         public List<Frames> ListFrames;
         public List<byte> FileToSave = new List<byte>();
-        public bool isPlayAsFrame;
+        //public bool isPlayAsFrame;
         public static Timer T = new Timer()
         {
             Interval = Interval
@@ -96,7 +105,7 @@ namespace ManageImage
                         cell.StartPosition.X, cell.StartPosition.Y, 2 * cell.Size / 3, 2 * cell.Size / 3);
                 }
             }
-            if (isDrawDisplayArea && isEditable)
+            if ((isDrawDisplayArea && isEditable) || !isPlay)
             {
                 //myBuffer.Graphics.DrawRectangle(recPen, displayRectangle);
                 if (ListAreas != null && ListAreas.Count > 0)
@@ -177,6 +186,7 @@ namespace ManageImage
                 {
                     var area = new Rectangle(x, y, width, height);
                     var listCellInArea = gridMaps.Where(cell => CurrentArea != null && IsGridInTheDisplayArea(cell, area)).ToList();
+                    listCellInArea.RemoveAll(m => ListAreas.Any(a => a.ListGrid.Contains(m) && a.AreaId != CurrentArea.AreaId));
                     if (ModifierKeys.HasFlag(Keys.Control))
                     {
                         foreach (var cell in listCellInArea)
@@ -217,12 +227,6 @@ namespace ManageImage
                                                               panel2.AutoScrollPosition.Y + changePoint.Y / 2);
                     }
                 }
-                //Point changePoint = new Point(e.Location.X - startPosition.X,
-                //                  e.Location.Y - startPosition.Y);
-                //if (e.Location.X < panel2.Location.X || e.Location.X > panel2.Location.X + panel2.Width)
-                //    panel2.AutoScrollPosition = new Point(panel2.AutoScrollPosition.X + changePoint.X,
-                //                                          panel2.AutoScrollPosition.Y + changePoint.Y);
-
                 panel1.Invalidate();
             }
         }
@@ -250,7 +254,7 @@ namespace ManageImage
                 }
                 else
                 {
-                    MessageBox.Show(@"You must create display area to continue.", @"Error", MessageBoxButtons.OK,
+                    MessageBox.Show(@"Bạn Phải tạo vùng hiển thị trước...", @"Error", MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                 }
             }
@@ -291,6 +295,7 @@ namespace ManageImage
         }
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            btnSave_Click(sender, e);
             if (ListAreas.Count > 0)
             {
                 if (CurrentArea == null)
@@ -301,7 +306,7 @@ namespace ManageImage
                 }
                 else
                 {
-                    MessageBox.Show(@"You must Save before.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Làm ơn Save giùm...", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -310,132 +315,141 @@ namespace ManageImage
         {
             isPlay = false;
             T.Stop();
-            isPlayAsFrame = false;
-            //isEditable = true;
-            //enableEditionToolStripMenuItem.Enabled = false;
-            //isDrawDisplayArea = true;
             index = 0;
-            //panel1.Focus();
-            //panel1.Invalidate();
+            panel1.Invalidate();
         }
         #endregion
         #region Button
         private void btnNewArea_Click(object sender, EventArgs e)
         {
-            if (ListAreas.Count > 6)
+            if (isEditable)
             {
-                MessageBox.Show(@"Can't add more area.", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-            {
-                if (CurrentArea != null)
+                if (ListAreas.Count > 5)
                 {
-                    if (CurrentArea.ListGrid == null || CurrentArea.ListGrid.Count == 0)
-                    {
-                        MessageBox.Show(@"You must completed the region before.", @"Warning", MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                    }
-                    else if (CurrentArea.ListFileTemplates == null || CurrentArea.ListFileTemplates.Count == 0)
-                    {
-                        MessageBox.Show(@"You must completed the region before.", @"Warning", MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                    }
-                    else
-                    {
-                        SaveCurrentArea(CurrentArea);
-                        AddNewArea();
-                    }
+                    MessageBox.Show(@"Không thể thêm nhiều vùng hơn nữa.", @"Có quá nhiều vùng.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
-                    AddNewArea();
+                    if (CurrentArea != null)
+                    {
+                        if (CurrentArea.ListGrid == null || CurrentArea.ListGrid.Count == 0)
+                        {
+                            MessageBox.Show(@"Vẽ vùng hiển thị nào...", @"Không có vùng hiển thị", MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                        }
+                        else if (CurrentArea.ListFileTemplates == null || CurrentArea.ListFileTemplates.Count == 0)
+                        {
+                            MessageBox.Show(@"Thêm hiệu ứng cho vùng trước đi..", @"Thiếu hiệu ứng..", MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                        }
+                        else
+                        {
+                            SaveCurrentArea(CurrentArea);
+                            AddNewArea();
+                        }
+                    }
+                    else
+                    {
+                        AddNewArea();
+                    }
                 }
             }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (CurrentArea != null && CurrentArea.ListGrid.Count == 0)
+            if (isEditable)
             {
-                MessageBox.Show(@"You must create display area to continue.", @"Error", MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-            }
-            else if (CurrentArea != null && CurrentArea.ListFileTemplates.Count == 0)
-            {
-                MessageBox.Show(@"You must choose effects before.", @"Warning", MessageBoxButtons.OK,
-                             MessageBoxIcon.Warning);
-            }
-            else if (CurrentArea != null && CurrentArea.ListFileTemplates.Count > 0)
-            {
-                isDragging = false;
-                isDrawDisplayArea = false;
-                //add new area black:
-                DisplayArea newArea = new DisplayArea();
-                foreach (var gridMap in gridMaps)
+                if (CurrentArea != null && CurrentArea.ListGrid.Count == 0)
                 {
-                    if (!ListAreas.Any(m => m.ListGrid.Contains(gridMap)))
-                    {
-                        var grid = new Cell()
-                        {
-                            IsEmpty = true,
-                            Color = Color.Black,
-                            X = gridMap.X,
-                            Y = gridMap.Y
-                        };
-                        newArea.ListGrid.Add(grid);
-                    }
+                    MessageBox.Show(@"Tạo vùng hiển thị trước đi nào..", @"Error", MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                 }
-                //calculate time play:
-                var time = ListAreas.Max(m => m.TimePlay);
+                else if (CurrentArea != null && CurrentArea.ListFileTemplates.Count == 0)
+                {
+                    MessageBox.Show(@"Chọn hiệu ứng trước khi lưu...", @"Warning", MessageBoxButtons.OK,
+                                 MessageBoxIcon.Warning);
+                }
+                else if (CurrentArea != null && CurrentArea.ListFileTemplates.Count > 0)
+                {
+                    isDragging = false;
+                    isDrawDisplayArea = false;
+                    //calculate time play:
+                    var time = ListAreas.Max(m => m.TimePlay);
 
-                ListAreas.Add(newArea);
-                foreach (var area in ListAreas)
-                {
-                    area.TimePlay = time;
-                    if (area.ListFileTemplates != null && area.ListFileTemplates.Count > 0)
+                    foreach (var area in ListAreas)
                     {
-                        area.ListImages = GetListImageOfArea(area.ListFileTemplates, time);
+                        area.TimePlay = time;
+                        if (area.ListFileTemplates != null && area.ListFileTemplates.Count > 0)
+                        {
+                            area.ListImages = GetListImageOfArea(area.ListFileTemplates, time);
+                        }
                     }
+                    SaveCurrentArea(CurrentArea);
+
+                    //add new area black:
+                    DisplayArea newArea = new DisplayArea();
+                    foreach (var gridMap in gridMaps)
+                    {
+                        if (!ListAreas.Any(m => m.ListGrid.Contains(gridMap)))
+                        {
+                            var grid = new Cell()
+                            {
+                                IsEmpty = true,
+                                Color = Color.Black,
+                                X = gridMap.X,
+                                Y = gridMap.Y
+                            };
+                            newArea.ListGrid.Add(grid);
+                        }
+                    }
+                    ListAreas.Add(newArea);
+                    CurrentArea = null;
+                    //MessageBox.Show(@"Save hoàn thành...", @"Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    trkbGridSize.Enabled = false;
+                    isEditable = false;
+                    enableEditionToolStripMenuItem.Enabled = true;
+                    ptbEnableEdit.Enabled = true;
                 }
-                SaveCurrentArea(CurrentArea);
-                CurrentArea = null;
-                MessageBox.Show(@"Save Successful.", @"Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                trkbGridSize.Enabled = false;
-                isEditable = false;
-                enableEditionToolStripMenuItem.Enabled = true;
             }
         }
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if (CurrentArea != null)
+            if (isEditable)
             {
-                var x = new List<DisplayArea>();
-                x = ListAreas.Where(m => m.AreaId != CurrentArea.AreaId).ToList();
-                //var idx = ListAreas.FindIndex(m => m.AreaId == CurrentArea.AreaId);
-                //ListAreas.RemoveAt(idx);
-                ListAreas = new List<DisplayArea>();
-                ListAreas.AddRange(x);
-                CurrentArea = null;
-                if (dgvListArea.CurrentRow != null)
-                    dgvListArea.Rows.RemoveAt(dgvListArea.CurrentRow.Index);
-                isDrawDisplayArea = true;
-                //panel1.Dispose();
-                if (myBuffer != null)
+                if (CurrentArea != null)
                 {
-                    myBuffer.Dispose();
-                    myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
-                                                       this.panel1.DisplayRectangle);
+                    var x = new List<DisplayArea>();
+                    x = ListAreas.Where(m => m.AreaId != CurrentArea.AreaId).ToList();
+                    //var idx = ListAreas.FindIndex(m => m.AreaId == CurrentArea.AreaId);
+                    //ListAreas.RemoveAt(idx);
+                    ListAreas = new List<DisplayArea>();
+                    ListAreas.AddRange(x);
+                    CurrentArea = null;
+                    if (dgvListArea.CurrentRow != null)
+                        dgvListArea.Rows.RemoveAt(dgvListArea.CurrentRow.Index);
+                    isDrawDisplayArea = true;
+                    //panel1.Dispose();
+                    if (myBuffer != null)
+                    {
+                        myBuffer.Dispose();
+                        myBuffer = currentContext.Allocate(this.panel1.CreateGraphics(),
+                                                           this.panel1.DisplayRectangle);
+                    }
+                    panel1.Invalidate();
                 }
-                panel1.Invalidate();
             }
         }
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            if (map == null)
+            if (isEditable)
             {
-                map = new frmMAP();
+                if (map == null)
+                {
+                    map = new frmMAP();
+                }
+                map.ShowDialog();
             }
-            map.ShowDialog();
         }
         #endregion
         #endregion
@@ -569,7 +583,7 @@ namespace ManageImage
                 {
                     case "red": return new SolidBrush(Color.FromArgb(128, Color.Red));
                     case "orange": return new SolidBrush(Color.FromArgb(128, Color.Orange));
-                    case "yellow": return new SolidBrush(Color.FromArgb(128, Color.Yellow));
+                    case "cyan": return new SolidBrush(Color.FromArgb(128, Color.Cyan));
                     case "green": return new SolidBrush(Color.FromArgb(128, Color.Green));
                     case "blue": return new SolidBrush(Color.FromArgb(128, Color.Blue));
                     case "violet": return new SolidBrush(Color.FromArgb(128, Color.Violet));
@@ -584,10 +598,10 @@ namespace ManageImage
                 switch (color)
                 {
                     case "red": return Color.Red;
-                    case "orange": return Color.Orange;
-                    case "yellow": return Color.Yellow;
                     case "green": return Color.Green;
                     case "blue": return Color.Blue;
+                    case "orange": return Color.Orange;
+                    case "cyan": return Color.Cyan;
                     case "violet": return Color.Violet;
                 }
             }
@@ -645,7 +659,7 @@ namespace ManageImage
             var area = new DisplayArea()
             {
                 AreaId = areaId,
-                Name = "Area " + areaId,
+                Name = ConfigurationManager.AppSettings["NameArea"] == null ? "Area" : ConfigurationManager.AppSettings["NameArea"] + " " + areaId,
                 Color = GetColorOfNewArea()
             };
             var idx = dgvListArea.Rows.Add(area.Name, "0", "0");
@@ -692,54 +706,18 @@ namespace ManageImage
             {
                 if (ii >= 0 && index < ListAreas[ii].ListImages.Count)
                 {
-                    if (isPlayAsFrame)
+                    for (int i = 0; i < ListAreas.Count; i++)
                     {
-                        foreach (var gridMap in gridMaps)
+                        if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
                         {
-                            if (ListAreas.Any(m => m.ListGrid.Contains(gridMap)))
+                            //Frames.DisplayAreas.Add(ListAreas[i]);
+                            var img = ListAreas[i].ListImages[index];
+                            Bitmap bm = new Bitmap(img);
+                            foreach (var cell in ListAreas[i].ListGrid)
                             {
-                                var area = ListAreas.FirstOrDefault(m => m.ListGrid.Contains(gridMap));
-                                var img = area.ListImages[index];
-                                Bitmap bm = new Bitmap(img);
-                                var color = bm.GetPixel(gridMap.X - area.X, gridMap.Y - area.Y);
-                                gridMap.Color = color;
-                                //var r = (byte)gridMap.Color.R;
-                                //var g = (byte)gridMap.Color.G;
-                                //var b = (byte)gridMap.Color.B;
-                                //FileToSave.Add(r);
-                                //FileToSave.Add(g);
-                                //FileToSave.Add(b);
-                                Frames.ListGrid.Add(gridMap);
-
-                            }
-                            else
-                            {
-                                gridMap.Color = Color.Black;
-                                //var r = (byte)gridMap.Color.R;
-                                //var g = (byte)gridMap.Color.G;
-                                //var b = (byte)gridMap.Color.B;
-                                //FileToSave.Add(r);
-                                //FileToSave.Add(g);
-                                //FileToSave.Add(b);
-                                Frames.ListGrid.Add(gridMap);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < ListAreas.Count; i++)
-                        {
-                            if (ListAreas[i].AreaId > 0 && ListAreas[i].ListGrid.Count > 0 && ListAreas[i].ListImages.Count > 0)
-                            {
-                                //Frames.DisplayAreas.Add(ListAreas[i]);
-                                var img = ListAreas[i].ListImages[index];
-                                Bitmap bm = new Bitmap(img);
-                                foreach (var cell in ListAreas[i].ListGrid)
-                                {
-                                    var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
-                                    cell.Color = color;
-                                    Frames.ListGrid.Add(cell);
-                                }
+                                var color = bm.GetPixel(cell.X - ListAreas[i].X, cell.Y - ListAreas[i].Y);
+                                cell.Color = color;
+                                Frames.ListGrid.Add(cell);
                             }
                         }
                     }
@@ -749,10 +727,10 @@ namespace ManageImage
                 else
                 {
                     index = 0;
-                    T.Stop();
+                    //T.Stop();
                 }
             }
-            this.panel1.Focus();
+            //this.panel1.Focus();
             this.panel1.Invalidate();
         }
 
@@ -863,29 +841,7 @@ namespace ManageImage
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ExportData();
-            isPlayAsFrame = true;
-        }
-
-        private void saveFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
-            var listByte = new List<byte>();
-            listByte.AddRange(numberLed);
-            listByte.AddRange(FileToSave);
-            var dataArray = listByte.ToArray();
-            using (FileStream
-           fileStream = new FileStream(@"D:\Dai\Template\ddd.dcm", FileMode.Create))
-            {
-                // Write the data to the file, byte by byte.
-                for (int i = 0; i < dataArray.Length; i++)
-                {
-                    fileStream.WriteByte(dataArray[i]);
-                }
-
-            }
-            //FileToSave.AddRange(numberLed);
-            // File.WriteAllBytes(@"D:\Dai\Template\file.dcm", listByte.ToArray());
-            MessageBox.Show(@"Save Successful");
+            //isPlayAsFrame = true;
         }
 
         #region Public method
@@ -945,9 +901,129 @@ namespace ManageImage
                     gridMaps.AddRange(newList);
                 }
             }
-            //panel1.Height = CellSize * h;
-            //panel1.Width = CellSize * w;
+            lblMapWidthValue.Text = width.ToString();
+            lblMapHeightValue.Text = height.ToString();
+            lblMapTotalLedValue.Text = gridMaps.Count.ToString();
             panel1.Invalidate();
+        }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            startToolStripMenuItem.PerformClick();
+        }
+
+        private void btnEnableEdit_Click(object sender, EventArgs e)
+        {
+            enableEditionToolStripMenuItem.PerformClick();
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            exportToolStripMenuItem.PerformClick();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            stopToolStripMenuItem.PerformClick();
+        }
+
+        private void ptbAddNew_MouseEnter(object sender, EventArgs e)
+        {
+            ptbAddNew.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbAddNew, "Thêm Vùng");
+        }
+
+        private void ptbAddNew_MouseLeave(object sender, EventArgs e)
+        {
+            ptbAddNew.BackColor = DefaultBackColor;
+        }
+
+        private void ptbMap_MouseEnter(object sender, EventArgs e)
+        {
+            ptbMap.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbMap, "Chỉnh Sửa Map");
+        }
+
+        private void ptbMap_MouseLeave(object sender, EventArgs e)
+        {
+            ptbMap.BackColor = DefaultBackColor;
+        }
+
+        private void ptbSave_MouseEnter(object sender, EventArgs e)
+        {
+            ptbSave.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbSave, "Save");
+        }
+
+        private void ptbSave_MouseLeave(object sender, EventArgs e)
+        {
+            ptbSave.BackColor = DefaultBackColor;
+        }
+
+        private void ptbDelete_MouseEnter(object sender, EventArgs e)
+        {
+            ptbDelete.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbDelete, "Xóa Vùng");
+        }
+
+        private void ptbDelete_MouseLeave(object sender, EventArgs e)
+        {
+            ptbDelete.BackColor = DefaultBackColor;
+        }
+
+        private void ptbPlay_MouseEnter(object sender, EventArgs e)
+        {
+            ptbPlay.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbPlay, "Play");
+        }
+
+        private void ptbPlay_MouseLeave(object sender, EventArgs e)
+        {
+            ptbPlay.BackColor = DefaultBackColor;
+        }
+
+        private void ptbPause_MouseEnter(object sender, EventArgs e)
+        {
+            ptbPause.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbPause, "Pause");
+        }
+
+        private void ptbPause_MouseLeave(object sender, EventArgs e)
+        {
+            ptbPause.BackColor = DefaultBackColor;
+        }
+
+        private void ptbExport_MouseEnter(object sender, EventArgs e)
+        {
+            ptbExport.BackColor = Color.LightBlue;
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbExport, "Xuất File");
+        }
+
+        private void ptbExport_MouseLeave(object sender, EventArgs e)
+        {
+            ptbExport.BackColor = DefaultBackColor;
+        }
+
+        private void ptbEnableEdit_MouseEnter(object sender, EventArgs e)
+        {
+            if (isEditable)
+            {
+                ptbEnableEdit.BackColor = Color.LightBlue;
+            }
+            ToolTip toolTip = new ToolTip();
+            toolTip.SetToolTip(ptbEnableEdit, "Cho Phép Chỉnh Sửa");
+        }
+
+        private void ptbEnableEdit_MouseLeave(object sender, EventArgs e)
+        {
+            ptbEnableEdit.BackColor = DefaultBackColor;
         }
 
         public void ClearMap()
@@ -965,7 +1041,7 @@ namespace ManageImage
             //int idx;
             FileToSave = new List<byte>();
             ListFrames = new List<Frames>();
-            var maxFrame = ListAreas[0].ListImages.Count;
+            var maxFrame = ListAreas.Max(m => m.ListImages.Count);
             FrmProgressbar progressbar = new FrmProgressbar();
             progressbar.progressBar1.Maximum = maxFrame;
             progressbar.progressBar1.Minimum = 0;
@@ -1003,8 +1079,8 @@ namespace ManageImage
                 };
                 for (int i = 0; i < ListAreas.Count; i++)
                 {
-                    var img = ListAreas[i].ListImages.Count > 0? ListAreas[i].ListImages[idx]:null;
-                    Bitmap bm = img != null?new Bitmap(img):null;
+                    var img = ListAreas[i].ListImages.Count > 0 ? ListAreas[i].ListImages[idx] : null;
+                    Bitmap bm = img != null ? new Bitmap(img) : null;
                     //Frames.DisplayAreas.Add(ListAreas[i]);
                     foreach (var cell in ListAreas[i].ListGrid)
                     {
@@ -1033,18 +1109,20 @@ namespace ManageImage
                         }
                     }
                 }
-                List<Cell> newList = frame.ListGrid.OrderBy(c => c.Y).ThenBy(n => n.X).ToList();
-                ListFrames.Add(new Frames()
-                {
-                    ListGrid =  newList
-                });
-                progressbar.progressBar1.PerformStep();
+                ListFrames.Add(frame);
+
             }
             var numberLed = BitConverter.GetBytes(gridMaps.Count);
             var listByte = new List<byte>();
             listByte.AddRange(numberLed);
             foreach (var frame in ListFrames)
             {
+                if (progressbar.IsCancel)
+                {
+                    return;
+                }
+                progressbar.progressBar1.PerformStep();
+                frame.ListGrid = ReOrderPixcel(frame.ListGrid);
                 foreach (var cell in frame.ListGrid)
                 {
                     FileToSave.Add(cell.Color.R);
@@ -1054,8 +1132,11 @@ namespace ManageImage
             }
             listByte.AddRange(FileToSave);
             var dataArray = listByte.ToArray();
+            var path = ConfigurationManager.AppSettings["SavePath"] ?? @"D:\Dai\Template\";
+            Directory.CreateDirectory(path);
+            var fileName = ConfigurationManager.AppSettings["SaveFileName"] ?? "sd.anc";
             using (FileStream
-            fileStream = new FileStream(@"D:\Dai\Template\ddd.dcm", FileMode.Create))
+            fileStream = new FileStream(path + fileName, FileMode.Create))
             {
                 // Write the data to the file, byte by byte.
                 for (int i = 0; i < dataArray.Length; i++)
@@ -1064,26 +1145,33 @@ namespace ManageImage
                 }
 
             }
-            MessageBox.Show(@"Export file success.");
+            MessageBox.Show(@"Lưu hoàn thành...");
             progressbar.Close();
+        }
 
-            //save to file:
-            //List<byte> fileToSave = new List<byte>();
-            //foreach (var frame in ListFrames)
-            //{
-            //    foreach (var cell in frame.ListGrid)
-            //    {
-            //        var r = (byte)cell.Color.R;
-            //        var g = (byte)cell.Color.G;
-            //        var b = (byte)cell.Color.B;
-            //        fileToSave.Add(r);
-            //        fileToSave.Add(g);
-            //        fileToSave.Add(b);
-            //    }
-            //}
-            //var numberLed = BitConverter.GetBytes(ListFrames[0].ListGrid.Count);
-            //fileToSave.AddRange(numberLed);
-            //File.WriteAllBytes(@"D:\Dai\Template\file.mgc",fileToSave.ToArray());
+        public List<Cell> ReOrderPixcel(List<Cell> listCell)
+        {
+            var retunValue = new List<Cell>();
+            for (int i = 0; i < height; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        var temp = listCell.FirstOrDefault(m => m.X == j && m.Y == i);
+                        retunValue.Add(temp);
+                    }
+                }
+                else
+                {
+                    for (int j = width - 1; j >= 0; j--)
+                    {
+                        var temp = listCell.FirstOrDefault(m => m.X == j && m.Y == i);
+                        retunValue.Add(temp);
+                    }
+                }
+            }
+            return retunValue;
         }
 
         #endregion

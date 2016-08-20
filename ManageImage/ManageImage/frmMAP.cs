@@ -17,6 +17,7 @@ namespace LedFullControl
 {
     public partial class frmMAP : Form
     {
+        private Point StartPoint;
         public frmMAP()
         {
             InitializeComponent();
@@ -53,6 +54,8 @@ namespace LedFullControl
         private void frmMAP_Load(object sender, EventArgs e)
         {
             picDraw.BackColor = Color.Black;
+            nbrVungRong.Value = KTLamViec.ChieuRong;
+            nbrVungCao.Value = KTLamViec.ChieuCao;
         }
 
         //----------------------------------------------------------------------------------------------------------
@@ -208,8 +211,8 @@ namespace LedFullControl
         private void picDraw_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.DrawLine(Pens.YellowGreen, 0, P2.Y, panelPicDraw.Width, P2.Y);
-            e.Graphics.DrawLine(Pens.YellowGreen, P2.X, 0, P2.X, panelPicDraw.Height);
+            e.Graphics.DrawLine(Pens.YellowGreen, 0, P2.Y, picDraw.Width, P2.Y);
+            e.Graphics.DrawLine(Pens.YellowGreen, P2.X, 0, P2.X, picDraw.Height);
             //e.Graphics.DrawLine(Pens.YellowGreen, P2.X - KichThuoc.CrossSize, P2.Y, P2.X + KichThuoc.CrossSize, P2.Y);
             //e.Graphics.DrawLine(Pens.YellowGreen, P2.X, P2.Y - KichThuoc.CrossSize, P2.X, P2.Y + KichThuoc.CrossSize);
             rtxtThongTin.Text = string.Format("Rộng hiển thị  {0} : {1}", panelPicDraw.Width, panelPicDraw.Height);
@@ -695,7 +698,7 @@ namespace LedFullControl
                 else { NewP1.Y = e.Location.Y / KichThuoc.GridGap; }
 
                 TD.VuaKick = NewP1;
-
+                StartPoint = NewP1;
                 if (NewP1.X > 0 && NewP1.Y > 0)     //	thêm led ở chỗ này
                 {
                     switch (CheDoVe)
@@ -2094,6 +2097,41 @@ namespace LedFullControl
             }
         }
         #endregion
+
+        private void btnChen_Click(object sender, EventArgs e)
+        {
+            var ledRong = nbrLedRong.Value;
+            var ledCao = nbrLedCao.Value;
+            Line1  = new List<Point>();
+            if (StartPoint.X > 0 && StartPoint.Y > 0)
+            {
+                for (int i = StartPoint.Y; i < ledCao+StartPoint.Y; i++)
+                {
+                    for (int j = StartPoint.X; j < ledRong+StartPoint.X; j++)
+                    {
+                        Line1.Add(new Point(j, i));
+                    }
+                }
+            }
+            
+        }
+
+        private void btnOkVung_Click(object sender, EventArgs e)
+        {
+            KTLamViec.ChieuRong = Convert.ToInt32(nbrVungRong.Value);
+            KTLamViec.ChieuCao = Convert.ToInt32(nbrVungCao.Value);
+            MakeBackgroundGrid();
+        }
+
+        private void nbrLedRong_Enter(object sender, EventArgs e)
+        {
+            nbrLedRong.Select(0,nbrLedRong.Text.Length);
+        }
+
+        private void nbrLedCao_Enter(object sender, EventArgs e)
+        {
+            nbrLedCao.Select(0, nbrLedCao.Text.Length);
+        }
 
         private void picDraw_MouseEnter(object sender, EventArgs e)
         {

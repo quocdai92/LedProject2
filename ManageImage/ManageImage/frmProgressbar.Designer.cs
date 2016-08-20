@@ -38,15 +38,17 @@
             this.progressBar1.Size = new System.Drawing.Size(669, 23);
             this.progressBar1.TabIndex = 0;
             // 
-            // frmProgressbar
+            // FrmProgressbar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ActiveBorder;
             this.ClientSize = new System.Drawing.Size(693, 51);
             this.ControlBox = false;
             this.Controls.Add(this.progressBar1);
             this.Name = "FrmProgressbar";
             this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Processing";
             this.ResumeLayout(false);
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -67,10 +68,10 @@ namespace ManageImage
             heightShow = area.Height;
             panel1.Width = widthShow * cellSize;
             panel1.Height = heightShow * cellSize;
-            dataGridView1.Columns.Add("FileName", "FileName");
-            dataGridView1.Columns.Add("TimePlay", "TimePlay");
-            dataGridView1.Columns[0].Width = dataGridView1.Width * 2 / 3;
-            dataGridView1.Columns[1].Width = dataGridView1.Width / 3;
+            dataGridView1.Columns.Add("FileName", ConfigurationManager.AppSettings["FileName"] ?? "FileName");
+            dataGridView1.Columns.Add("TimePlay", "T(s)");
+            dataGridView1.Columns[0].Width = 335;
+            dataGridView1.Columns[1].Width = 40;
             dataGridView1.ReadOnly = false;
             dataGridView1.Columns[0].ReadOnly = true;
             ListFile = new List<FileTemplate>();
@@ -80,7 +81,7 @@ namespace ManageImage
                 {
                     if (bitmap == null)
                     {
-                        firstImage = file.ListImages.ElementAt(0);
+                        firstImage = file.ListImageReturn.ElementAt(0);
                         bitmap = (Bitmap)(firstImage);
                         setup(true);
                         //setFileInfo();
@@ -202,75 +203,86 @@ namespace ManageImage
 
         }
 
-        public List<Image> readFileTmp(string filename)
+        public List<Image> ReadFileTmp(string filename)
         {
-            List<Image> listImg = new List<Image>();
-            var fileTobyte = File.ReadAllBytes(filename);
-            var readFile = EncDec.Decrypt(fileTobyte, Key);
-            int from = 0;
-            for (int i = 0; i < readFile.Length; i++)
+            try
             {
-                //read header:
-                if ((char)readFile[i] == 'e' && (char)readFile[i + 1] == 'h' && (char)readFile[i + 2] == 'd'
-                    && (char)readFile[i + 3] == 'e' && (char)readFile[i + 4] == 'r')
+
+                List<Image> listImg = new List<Image>();
+                var fileTobyte = File.ReadAllBytes(filename);
+                var readFile = EncDec.Decrypt(fileTobyte, Key);
+                int from = 0;
+                for (int i = 0; i < readFile.Length; i++)
                 {
-                    from = i + 5;
-                }
-                //read ListImage
-                if ((char)readFile[i] == 'e' && (char)readFile[i + 1] == 'n' && (char)readFile[i + 2] == 'd')
-                {
-                    var outFile = new byte[i - from];
-                    var k = 0;
-                    for (int j = from; j < i; j++)
+                    //read header:
+                    if ((char)readFile[i] == 'e' && (char)readFile[i + 1] == 'h' && (char)readFile[i + 2] == 'd'
+                        && (char)readFile[i + 3] == 'e' && (char)readFile[i + 4] == 'r')
                     {
-                        outFile[k] = readFile[j];
-                        k++;
+                        from = i + 5;
                     }
-                    var img = ByteArrayToImage(outFile);
-                    listImg.Add(img);
-                    from = i + 3;
+                    //read ListImage
+                    if ((char)readFile[i] == 'e' && (char)readFile[i + 1] == 'n' && (char)readFile[i + 2] == 'd')
+                    {
+                        var outFile = new byte[i - from];
+                        var k = 0;
+                        for (int j = from; j < i; j++)
+                        {
+                            outFile[k] = readFile[j];
+                            k++;
+                        }
+                        var img = ByteArrayToImage(outFile);
+                        listImg.Add(img);
+                        from = i + 3;
+                    }
                 }
+                return listImg;
             }
-            return listImg;
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private void openFile()
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Multiselect = true;
-            if(ListFile == null)
+            if (ListFile == null)
                 ListFile = new List<FileTemplate>();
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 foreach (var fileName in openFileDialog1.FileNames)
                 {
-                    var listImg = readFileTmp(fileName);
-                    if (bitmap == null)
+                    var listImg = ReadFileTmp(fileName);
+                    if (listImg != null)
                     {
-                        firstImage = listImg.ElementAt(0);
-                        bitmap = (Bitmap)(firstImage);
-                        setup(true);
-                        //setFileInfo();
-                        panel1.Invalidate();
+                        if (bitmap == null)
+                        {
+                            firstImage = listImg.ElementAt(0);
+                            bitmap = (Bitmap)(firstImage);
+                            setup(true);
+                            //setFileInfo();
+                            panel1.Invalidate();
+                        }
+                        x = 0;
+                        y = 0;
+                        height = heightShow;
+                        width = widthShow;
+                        ListFile.Add(new FileTemplate()
+                        {
+                            FileName = fileName,
+                            X = x,
+                            Y = y,
+                            Width = width,
+                            Height = height,
+                            Angle = angle,
+                            ListImages = listImg,
+                            TimePlay = 10
+                        });
+                        //Table.Rows.Add(new object[] { fileName, 10 });
+                        var idx = dataGridView1.Rows.Add(fileName, "10");
+                        dataGridView1.Rows[idx].HeaderCell.Value = String.Format("{0}", idx + 1);
                     }
-                    x = 0;
-                    y = 0;
-                    height = heightShow;
-                    width = widthShow;
-                    ListFile.Add(new FileTemplate()
-                    {
-                        FileName = fileName,
-                        X = x,
-                        Y = y,
-                        Width = width,
-                        Height = height,
-                        Angle = angle,
-                        ListImages = listImg,
-                        TimePlay = 10
-                    });
-                    //Table.Rows.Add(new object[] { fileName, 10 });
-                    var idx = dataGridView1.Rows.Add(fileName, "10");
-                    dataGridView1.Rows[idx].HeaderCell.Value = String.Format("{0}", idx + 1);
                 }
             }
         }
@@ -367,7 +379,6 @@ namespace ManageImage
                     var cellImg = resizeImage(cropImg, width / cellSize, height / cellSize);
                     listImgCrop.Add(cellImg);
                     //listImgCrop.Add(cropImg);
-                    progressBarSave.PerformStep();
                 }
             }
             return listImgCrop;
@@ -382,7 +393,7 @@ namespace ManageImage
                 int timeplay = 0;
                 Int32.TryParse(dataGridView1.CurrentRow.Cells[1].Value.ToString(), out timeplay);
                 List<Image> listImg = new List<Image>();
-                var listImageFile = readFileTmp(filename);
+                var listImageFile = ReadFileTmp(filename);
                 foreach (Image img in listImageFile)
                 {
                     img.RotateFlip(GetRotateFlipType(angle));
@@ -429,7 +440,7 @@ namespace ManageImage
                     int timeplay = 0;
                     Int32.TryParse(row.Cells[1].Value.ToString(), out timeplay);
                     List<Image> listImg = new List<Image>();
-                    var listImageFile = readFileTmp(filename);
+                    var listImageFile = ReadFileTmp(filename);
                     foreach (Image img in listImageFile)
                     {
                         img.RotateFlip(GetRotateFlipType(angle));
@@ -498,7 +509,7 @@ namespace ManageImage
         {
             int tempX = Convert.ToInt32(tbX.Text);
 
-            if (tempX < width)
+            if (tempX < widthShow)
             {
                 x = tempX;
                 ListImage = new List<Image>();
@@ -520,7 +531,7 @@ namespace ManageImage
             }
             else
             {
-                MessageBox.Show(@"X must be less than Width!", @"Error");
+                MessageBox.Show(String.Format("X phải nhỏ hơn {0}!",widthShow), @"Error");
                 tbX.Text = x.ToString();
             }
 
@@ -529,7 +540,7 @@ namespace ManageImage
         private void tbY_TextChanged(object sender, EventArgs e)
         {
             int tempY = Convert.ToInt32(tbY.Text);
-            if (tempY < height)
+            if (tempY < heightShow)
             {
                 y = tempY;
                 ListImage = new List<Image>();
@@ -550,7 +561,7 @@ namespace ManageImage
             }
             else
             {
-                MessageBox.Show(@"Y must be less than Height!", @"Error");
+                MessageBox.Show(string.Format("Y phải nhỏ hơn {0}!", heightShow), @"Error");
                 tbY.Text = y.ToString();
             }
 
@@ -586,7 +597,7 @@ namespace ManageImage
             }
             else
             {
-                MessageBox.Show(@"Width must be greater or equal than X!", @"Error");
+                MessageBox.Show(string.Format("Rộng phải lớn hơn hoặc bằng {0}!",x), @"Error");
                 tbWidth.Text = width.ToString();
             }
         }
@@ -619,7 +630,7 @@ namespace ManageImage
             }
             else
             {
-                MessageBox.Show(@"Height must be greater or equal than Y!", @"Error");
+                MessageBox.Show(string.Format("Chiều Cao phải lớn hơn hoặc bằng {0}!",y), @"Error");
                 tbHeight.Text = height.ToString();
             }
 
@@ -633,8 +644,11 @@ namespace ManageImage
 
         private void btSave_Click(object sender, EventArgs e)
         {
-            progressBarSave.Visible = true;
-            progressBarSave.Maximum = dataGridView1.Rows.Count;
+            FrmProgressbar progressbar = new FrmProgressbar();
+            progressbar.progressBar1.Maximum = ListFile.Count;
+            progressbar.progressBar1.Minimum = 0;
+            progressbar.progressBar1.Step = 1;
+            progressbar.Show();
             Main.CurrentArea.ListFileTemplates = new List<FileTemplate>();
             Main.CurrentArea.ListImages = new List<Image>();
             if (CurrentFileTemplate != null)
@@ -651,12 +665,14 @@ namespace ManageImage
                 }
                 Main.CurrentArea.ListFileTemplates.Add(file);
                 timePlay += timeplay;
-                progressBarSave.PerformLayout();
+                progressbar.progressBar1.PerformStep();
             }
+            progressbar.Close();
             Main.CurrentArea.TimePlay = timePlay;
             //Main.CurrentArea.Angle = angle;
-            MessageBox.Show(@"Save successfully!", @"Save");
-            //this.Dispose();
+            MessageBox.Show(@"Lưu thành công...", @"Save");
+            T.Stop();
+            this.Dispose();
             this.Close();
         }
 
@@ -707,12 +723,22 @@ namespace ManageImage
             if (CurrentFileTemplate != null && CurrentFileTemplate.ListImages.Count > 0)
             {
                 comboBox1.SelectedIndex = comboBox1.FindStringExact(CurrentFileTemplate.Angle.ToString());
-                ListImage = RotateListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Angle);
-                ListImage = ReSizeListImage(ListImage, widthShow, heightShow);
-                firstImage = CurrentFileTemplate.ListImages[0];
+                var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                        CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                    heightShow - CurrentFileTemplate.Y);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                //ListImage = RotateListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Angle);
+                //ListImage = ReSizeListImage(ListImage, widthShow, heightShow);
+                firstImage = ListImage[0];
                 bitmap = (Bitmap)(firstImage);
                 setup(true);
             }
+            PlayRow();
+            btnPlay.PerformClick();
         }
 
         private void playAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -735,9 +761,19 @@ namespace ManageImage
             if (CurrentFileTemplate != null)
             {
                 CurrentFileTemplate.Angle = angle;
-                ListImage = RotateListImage(CurrentFileTemplate.ListImages, angle);
-                ListImage = ReSizeListImage(ListImage, CurrentFileTemplate.Width,
-                    CurrentFileTemplate.Height);
+                var listImage = new List<Image>();
+                listImage.AddRange(CurrentFileTemplate.ListImages);
+                var lstResizeImage = RotateListImage(listImage, angle);
+                lstResizeImage = ReSizeListImage(lstResizeImage, CurrentFileTemplate.Width, CurrentFileTemplate.Height);
+                var rectCrop = new Rectangle(CurrentFileTemplate.X, CurrentFileTemplate.Y, widthShow - CurrentFileTemplate.X,
+                   heightShow - CurrentFileTemplate.Y);
+                foreach (var image in lstResizeImage)
+                {
+                    ListImage.Add(cropImage(image, rectCrop));
+                }
+                //var lstResizeImage = ReSizeListImage(CurrentFileTemplate.ListImages, CurrentFileTemplate.Width,
+                //        CurrentFileTemplate.Height);
+
             }
             //var listImage = createListAllImage();
             //ListImage = new List<Image>();
@@ -827,9 +863,9 @@ namespace ManageImage
                 tbX.Text = CurrentFileTemplate.X.ToString();
                 tbY.Text = CurrentFileTemplate.Y.ToString();
                 tbWidth.Text = CurrentFileTemplate.Width.ToString();
-                tbWidth.Minimum = CurrentFileTemplate.Width;
+                tbWidth.Minimum = widthShow;
                 tbHeight.Text = CurrentFileTemplate.Height.ToString();
-                tbHeight.Minimum = CurrentFileTemplate.Height;
+                tbHeight.Minimum = heightShow;
                 comboBox1.SelectedIndex = comboBox1.FindStringExact(CurrentFileTemplate.Angle.ToString());
             }
         }
@@ -861,6 +897,61 @@ namespace ManageImage
                 {
                     CurrentFileTemplate.TimePlay = Convert.ToInt32(dataGridView1.CurrentCell.Value);
                 }
+            }
+        }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            if (ListImage != null && ListImage.Count > 0)
+            {
+                //ListImage = new List<Image>(CurrentFileTemplate.ListImages);
+                isStart = true;
+                T.Start();
+                ListImage = CaculateListImage(CurrentFileTemplate.TimePlay);
+            }
+        }
+
+        private void PlayRow()
+        {
+            if (ListImage != null && ListImage.Count > 0)
+            {
+                //ListImage = new List<Image>(CurrentFileTemplate.ListImages);
+                isStart = true;
+                T.Start();
+                ListImage = CaculateListImage(CurrentFileTemplate.TimePlay);
+            }
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            isStart = false;
+            T.Stop();
+            index = 0;
+            //ListImage.Clear();
+            bitmap = (Bitmap)firstImage;
+            isStart = false;
+            setup(true);
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            //foreach (DataGridViewRow item in this.dataGridView1.SelectedRows)
+            //{
+            //    dataGridView1.Rows.RemoveAt(item.Index);
+            //    var fileName = item.Cells[0].Value;
+            //    //ListFile = new List<FileTemplate>();
+            //    var fileTemplates = ListFile.Where(m => !m.FileName.Equals(fileName)).ToList();
+            //    ListFile = new List<FileTemplate>();
+            //    ListFile.AddRange(fileTemplates);
+            //}
+            if (dataGridView1.CurrentRow != null)
+            {
+                dataGridView1.Rows.RemoveAt(dataGridView1.CurrentRow.Index);
+                var fileName = dataGridView1.CurrentRow.Cells[0].Value;
+                //ListFile = new List<FileTemplate>();
+                var fileTemplates = ListFile.Where(m => !m.FileName.Equals(fileName)).ToList();
+                ListFile = new List<FileTemplate>();
+                ListFile.AddRange(fileTemplates);
             }
         }
     }
